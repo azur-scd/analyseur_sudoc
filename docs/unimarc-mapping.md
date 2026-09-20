@@ -5,7 +5,7 @@ Ce document centralise les choix de mapping UNIMARC utilisés par le projet.
 
 > Important : les règles ci-dessous constituent le mapping initial. Elles devront être vérifiées et complétées à partir des notices Sudoc réellement rencontrées.
 
-## Extraction implémentée (V0.3.6, étape 1)
+## Extraction implémentée (V0.3.7, étape 1)
 
 Le script `scripts/03_parse_unimarc.py` lit uniquement les pages validées du
 rapport de collecte et vérifie leurs empreintes SHA-256. Il produit des JSONL
@@ -16,6 +16,24 @@ par zone (indices commençant à 1), ses indicateurs et toutes ses sous-zones da
 l'ordre original. Le rapport d'extraction est distinct du rapport de collecte.
 
 ### Règles de transformation
+
+- Les types documentaires sont extraits dans quatre listes de `documents.jsonl`,
+  également exportées dans quatre fichiers JSONL du même nom avec PPN et provenance :
+  - `leader_types` : label brut, `record_type` en position 6,
+    `bibliographic_level` en position 7 et `type_code` combinant les deux
+    (par exemple `am`). Chaque label est conservé avec son numéro d'occurrence.
+  - `content_types` : toutes les zones 181 (forme du contenu), avec indicateurs,
+    références d'occurrence et toutes les sous-zones ordonnées, brutes et normalisées.
+  - `media_types` : toutes les zones 182 (type de médiation), selon la même structure.
+    Les répétitions, les vocabulaires $2 et les liens $6 sont conservés ; les
+    différentes représentations codées ne sont ni fusionnées ni dédoublonnées.
+  - `nature_of_content` : pour chaque 105$a, champ brut et normalisé, référence
+    d'occurrence et `code` prélevé à la position 4 du **champ brut**. Seule cette
+    première position est extraite ici, pas l'ensemble des positions 4–7.
+  Les positions du label et de 105$a commencent à **0**. Un champ trop court
+  donne un code nul ; un espace ou un caractère de remplissage reste intact.
+  Une zone absente donne une liste vide. Les codes sont conservés sans traduction
+  ni déduction d'un type unique à partir de ces différentes sources.
 
 - Les textes normalisés retirent les caractères de non-tri U+0098/U+009C,
   normalisent Unicode en NFC et les espaces. Les valeurs `raw` restent intactes.

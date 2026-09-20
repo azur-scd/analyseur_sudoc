@@ -13,7 +13,7 @@ from lxml import etree
 
 from sudoc_explorer.sudoc import NS, now, parse_page, write_json
 
-PARSER_VERSION = "0.3.6"
+PARSER_VERSION = "0.3.7"
 AUTHOR_TAGS = {"700", "701", "702", "710", "711", "712"}
 SUBJECT_TAGS = {str(tag) for tag in range(600, 621)}
 ARK_ALPHABET = "0123456789bcdfghjkmnpqrstvwxz"
@@ -171,7 +171,24 @@ def parse_record(record, source):
                                                      "raw": item["raw"], "comparison_b_5": comparison})
     holdings = [{"rcr": rcr, "evidence": evidence, "validation_status": "user_confirmed_930b"}
                 for rcr, evidence in sorted(holding_evidence.items())]
+    leader_types = []
+    for occurrence, node in enumerate(children(record, "leader"), 1):
+        raw = node.text or ""
+        leader_types.append({"source_field": "leader", "occurrence": occurrence, "raw": raw,
+                             "record_type": raw[6] if len(raw) > 6 else None,
+                             "bibliographic_level": raw[7] if len(raw) > 7 else None,
+                             "type_code": raw[6:8] if len(raw) > 7 else None})
+    # Conserver les sous-zones, vocabulaires et liens $6 de chaque occurrence.
+    content_types = [{**ref(f), "subfields": [{**sub, "value": clean(sub["raw"])} for sub in f["subfields"]]}
+                     for f in grouped["181"]]
+    media_types = [{**ref(f), "subfields": [{**sub, "value": clean(sub["raw"])} for sub in f["subfields"]]}
+                   for f in grouped["182"]]
+    nature_of_content = [{**ref(f), **item, "position": 4,
+                          "code": item["raw"][4] if len(item["raw"]) > 4 else None}
+                         for f in grouped["105"] for item in field_values(f, "a")]
     return {"ppn": ppn, "source": source, "bnf_links": bnf_links, "summaries": summaries,
+            "leader_types": leader_types, "content_types": content_types,
+            "media_types": media_types, "nature_of_content": nature_of_content,
             "leader_raw": [n.text or "" for n in children(record, "leader")],
             "controlfields": [{"tag": n.get("tag"), "raw": n.text or ""} for n in children(record, "controlfield")],
             "source_fields": fields, "titles": titles,
@@ -241,6 +258,8 @@ def extract_campaign(run_dir: Path, output_dir: Path):
     subject_fields = Counter()
     rcrs_seen = set()
     files = {"documents": None, "bnf_links": "bnf_links", "summaries": "summaries",
+             "leader_types": "leader_types", "content_types": "content_types",
+             "media_types": "media_types", "nature_of_content": "nature_of_content",
              "publishers": "publishers", "authors": "authors",
              "classifications": "classifications", "subjects": "subjects",
              "locations": "locations", "holdings": "holdings"}

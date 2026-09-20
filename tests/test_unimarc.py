@@ -13,6 +13,36 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 class RecordTests(unittest.TestCase):
+    def test_document_types_positions_repetitions_and_missing(self):
+        record = etree.fromstring(b'''<record><leader>     nam0 22        450 </leader>
+          <controlfield tag="001">000000001</controlfield>
+          <datafield tag="105" ind1=" " ind2=" "><subfield code="a">    va  000yy</subfield></datafield>
+          <datafield tag="181" ind1=" " ind2=" "><subfield code="c">txt</subfield><subfield code="2">rdacontent</subfield><subfield code="6">z01</subfield></datafield>
+          <datafield tag="181" ind1=" " ind2=" "><subfield code="a">i#</subfield></datafield>
+          <datafield tag="182" ind1=" " ind2=" "><subfield code="c">n</subfield><subfield code="c">c</subfield></datafield>
+          <datafield tag="182" ind1=" " ind2=" "><subfield code="a">n</subfield></datafield>
+        </record>''')
+        parsed = parse_record(record, {})
+        self.assertEqual(parsed["leader_types"][0]["type_code"], "am")
+        self.assertEqual(parsed["leader_types"][0]["record_type"], "a")
+        self.assertEqual(parsed["leader_types"][0]["bibliographic_level"], "m")
+        self.assertEqual(parsed["nature_of_content"][0]["code"], "v")
+        self.assertEqual(len(parsed["content_types"]), 2)
+        self.assertEqual(parsed["content_types"][1]["occurrence"], 2)
+        self.assertEqual([s["value"] for s in parsed["media_types"][0]["subfields"]], ["n", "c"])
+        self.assertEqual(len(parsed["media_types"]), 2)
+        record.find("leader").text = "short"
+        record.find("datafield/subfield").text = "tiny"
+        parsed = parse_record(record, {})
+        self.assertIsNone(parsed["leader_types"][0]["type_code"])
+        self.assertIsNone(parsed["nature_of_content"][0]["code"])
+        for node in list(record):
+            if node.tag != "controlfield":
+                record.remove(node)
+        parsed = parse_record(record, {})
+        for key in ("leader_types", "content_types", "media_types", "nature_of_content"):
+            self.assertEqual(parsed[key], [])
+
     def test_bnf_ark_known_keys_and_input_validation(self):
         # Deux clés réellement présentes dans les 033 du lot, et l'exemple utilisateur.
         for number, key in [("45225369", "x"), ("45636685", "4"), ("48731321", "f")]:

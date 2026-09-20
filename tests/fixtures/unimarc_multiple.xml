@@ -1,0 +1,25 @@
+<record>
+  <leader>     nam0 22        450 </leader>
+  <controlfield tag="001">01234567X</controlfield>
+  <datafield tag="100" ind1=" " ind2=" "><subfield code="a">20260101h20251986                 </subfield></datafield>
+  <datafield tag="200" ind1="1" ind2=" "><subfield code="a">&#x98;Le &#x9c;titre</subfield><subfield code="e">Un sous-titre</subfield><subfield code="h">2</subfield><subfield code="i">La suite</subfield></datafield>
+  <datafield tag="200" ind1="1" ind2=" "><subfield code="a">Autre écriture</subfield><subfield code="6">a01</subfield></datafield>
+  <datafield tag="101"><subfield code="a">fre</subfield><subfield code="a">eng</subfield><subfield code="c">ger</subfield></datafield>
+  <datafield tag="102"><subfield code="a">FR</subfield><subfield code="a">GB</subfield></datafield>
+  <datafield tag="210"><subfield code="c">Éditeur ancien</subfield><subfield code="d">DL 2025</subfield></datafield>
+  <datafield tag="214" ind1=" " ind2="0"><subfield code="c">Premier éditeur</subfield><subfield code="c">Second éditeur</subfield><subfield code="d">[2025?]</subfield></datafield>
+  <datafield tag="700"><subfield code="a">Nom</subfield><subfield code="b">Prénom</subfield><subfield code="3">00123456X</subfield><subfield code="4">070</subfield><subfield code="4">340</subfield></datafield>
+  <datafield tag="701"><subfield code="a">Coauteur</subfield></datafield>
+  <datafield tag="702"><subfield code="a">Traducteur</subfield><subfield code="4">730</subfield></datafield>
+  <datafield tag="710"><subfield code="a">Université</subfield><subfield code="b">Bibliothèque</subfield><subfield code="b">Service</subfield></datafield>
+  <datafield tag="711"><subfield code="a">Congrès</subfield></datafield>
+  <datafield tag="712"><subfield code="a">Association</subfield></datafield>
+  <datafield tag="676"><subfield code="a">746.9/7/0996</subfield><subfield code="v">19</subfield></datafield>
+  <datafield tag="676"><subfield code="a">005.13</subfield><subfield code="a">[inconnu]</subfield></datafield>
+  <datafield tag="930"><subfield code="5">040702201:012345678</subfield><subfield code="b">040702201</subfield><subfield code="a">COTE 1</subfield></datafield>
+  <datafield tag="930"><subfield code="5">040702201:012345686</subfield><subfield code="b">040702201</subfield><subfield code="a">COTE 2</subfield></datafield>
+  <datafield tag="930"><subfield code="5">999999999:012345694</subfield><subfield code="b">751032301</subfield></datafield>
+  <datafield tag="930"><subfield code="5">888888888:01234570X</subfield></datafield>
+  <datafield tag="930"><subfield code="b">invalide</subfield></datafield>
+  <datafield tag="915"><subfield code="5">777777777:012345718</subfield><subfield code="a">CODE-BARRES</subfield></datafield>
+</record>

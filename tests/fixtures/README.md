@@ -9,3 +9,8 @@ La notice et l'enveloppe ont été conservées. Le bloc `extraResponseData`
 (informations techniques de session) et l'instruction de feuille de style ont
 été retirés. La fixture vérifie le format effectivement reçu : diagnostic
 `1/0`, requête encodée dans l'écho, MARC sans espace de noms, positions et PPN.
+
+`unimarc_multiple.xml` : fixture synthétique, couvrant zones et sous-zones répétées,
+écritures alternatives, dates, rôles d'auteur, collectivités, Dewey segmenté,
+plusieurs exemplaires d'un RCR, discordance 930$b/$5, $b absent ou invalide et
+identifiants $5 dans une autre zone. Les identifiants sont des exemples de test.

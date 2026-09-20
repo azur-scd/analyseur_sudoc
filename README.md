@@ -134,6 +134,38 @@ collecte : créer alors une nouvelle campagne pour ne pas mélanger les résulta
 
 Voir [les choix et limites de la collecte SRU](docs/sru-collection.md).
 
+## Extraire les données UNIMARC du lot existant
+
+```powershell
+.\.venv\Scripts\python.exe scripts/03_parse_unimarc.py --run-dir data/raw/sudoc/2025/sample-2000
+```
+
+Cette commande travaille uniquement sur les XML déjà téléchargés. Elle crée un
+nouveau dossier horodaté sous `data/processed/sudoc/sample-2000/`. L'option
+`--output-dir` permet de choisir un autre dossier vide. Aucune collecte supplémentaire
+ni écriture dans DuckDB n'est effectuée.
+
+- `documents.jsonl` : une notice par ligne, titres, dates, langues, pays,
+  éditeurs/agents, auteurs, Dewey, localisations et champs bruts.
+- `authors.jsonl`, `publishers.jsonl`, `classifications.jsonl` : extractions par
+  occurrence avec PPN et provenance. Les agents des zones 214 sont distingués par rôle.
+- `subjects.jsonl` : toutes les occurrences des zones 600 à 620 incluses,
+  avec indicateurs et sous-zones ordonnées (code, valeur brute et normalisée).
+  Ces indexations sont aussi présentes dans `documents.jsonl`, sous `subjects`.
+- `bnf_links.jsonl` : valeurs des `033$a` contenant `catalogue.bnf`, avec URL,
+  valeur brute, PPN et provenance ; à défaut de lien BnF en 033$a, URL calculées
+  à partir des huit chiffres après `FRBNF` dans les `035$a` (clé ARK modulo 29).
+  `origin` distingue `033a` et `035a`. Ces liens sont aussi dans `documents.jsonl`.
+- `locations.jsonl` : toutes les zones 930, y compris les répétitions et les anomalies.
+- `holdings_observed.jsonl` : couples PPN/RCR distincts lus en 930$b, avec leurs preuves.
+- `localisations_a_verifier.csv` : tableau ouvrable dans un tableur, une ligne par
+  notice, pour comparer les RCR de 930$b aux candidats trouvés dans les $5.
+- `report.json` : comptages d'extraction et statut de validation des localisations.
+
+Les localisations sont des **observations du XML reçu** ; leur exhaustivité n'est
+pas établie. Le parser ne complète pas 930$b à partir des $5 et ne consulte aucun
+service de localisation. Voir [le mapping UNIMARC](docs/unimarc-mapping.md).
+
 ## Tests hors réseau
 
 ```powershell

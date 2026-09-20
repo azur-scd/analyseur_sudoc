@@ -160,14 +160,23 @@ ni écriture dans DuckDB n'est effectuée.
   à partir des huit chiffres après `FRBNF` dans les `035$a` (clé ARK modulo 29).
   `origin` distingue `033a` et `035a`. Ces liens sont aussi dans `documents.jsonl`.
 - `locations.jsonl` : toutes les zones 930, y compris les répétitions et les anomalies.
-- `holdings_observed.jsonl` : couples PPN/RCR distincts lus en 930$b, avec leurs preuves.
+- `holdings.jsonl` : couples PPN/RCR dédoublonnés issus de 930$b, source validée
+  par l'utilisateur, avec toutes les occurrences qui les justifient. Également
+  présents sous `holdings` dans `documents.jsonl`.
 - `localisations_a_verifier.csv` : tableau ouvrable dans un tableur, une ligne par
   notice, pour comparer les RCR de 930$b aux candidats trouvés dans les $5.
 - `report.json` : comptages d'extraction et statut de validation des localisations.
 
-Les localisations sont des **observations du XML reçu** ; leur exhaustivité n'est
-pas établie. Le parser ne complète pas 930$b à partir des $5 et ne consulte aucun
-service de localisation. Voir [le mapping UNIMARC](docs/unimarc-mapping.md).
+La source **930$b est validée par l'utilisateur** pour les RCR. Un RCR apparaît
+une seule fois par notice dans `holdings`, même si plusieurs 930 le contiennent.
+Le parser ne complète pas 930$b à partir des $5. Les anciennes extractions
+conservent leur fichier `holdings_observed.jsonl` ; les nouvelles utilisent
+`holdings.jsonl`. Voir [le mapping UNIMARC](docs/unimarc-mapping.md).
+
+Les notices sans aucun `930$b` non vide sont exclues de tous les exports.
+Leurs PPN et leur provenance sont listés dans `report.json` sous `exclusions`.
+Le rapport distingue les notices lues, conservées et exclues. Les sources XML
+et les anciennes versions des extractions restent conservées.
 
 ## Tests hors réseau
 

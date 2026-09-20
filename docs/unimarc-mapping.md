@@ -5,7 +5,7 @@ Ce document centralise les choix de mapping UNIMARC utilisés par le projet.
 
 > Important : les règles ci-dessous constituent le mapping initial. Elles devront être vérifiées et complétées à partir des notices Sudoc réellement rencontrées.
 
-## Extraction implémentée (V0.3.4, étape 1)
+## Extraction implémentée (V0.3.6, étape 1)
 
 Le script `scripts/03_parse_unimarc.py` lit uniquement les pages validées du
 rapport de collecte et vérifie leurs empreintes SHA-256. Il produit des JSONL
@@ -130,12 +130,32 @@ donne `counts.subjects`, `counts.records_with_subjects` et `subjects_by_field`.
 Les zones hors intervalle, notamment 676, restent traitées par leurs extractions
 respectives ou conservées dans `source_fields`.
 
-### Localisations : extraction provisoire
+### Localisations : source validée et dédoublonnage
+
+À partir de V0.3.6, une notice doit contenir au moins un **930$b non vide** pour
+être conservée. Sinon elle est exclue de tous les exports bibliographiques et
+du CSV des localisations. Aucun $5 ne permet de contourner ce filtre.
+Le rapport conserve son PPN, sa provenance et le motif dans `exclusions`, et
+distingue `records_parsed`, `records_retained` et `records_excluded`. Les autres
+comptages concernent les notices conservées. Les XML bruts et les anciennes
+extractions ne sont pas modifiés. Un $b non vide mais mal formé reste signalé
+comme invalide et ne donne pas de relation PPN/RCR ; ce n'est pas une absence de $b.
 
 Chaque 930 est exportée intégralement dans `locations.jsonl`, même sans $b.
-Seuls les $b contenant un RCR de neuf chiffres donnent des relations observées.
-Les répétitions d'un RCR sont regroupées uniquement dans `holdings_observed`,
-avec toutes leurs preuves ; elles restent séparées dans `locations`.
+La source 930$b est validée par l'utilisateur. Seuls les $b contenant un RCR de
+neuf chiffres donnent des relations dans `holdings` (liste dans `documents.jsonl`
+et fichier spécialisé `holdings.jsonl`). Le dédoublonnage porte sur le couple
+**PPN/RCR** : plusieurs occurrences d'un RCR dans la même notice donnent une
+seule relation ; le même RCR dans deux notices donne deux relations distinctes.
+Chaque relation conserve toutes ses preuves dans `evidence`, et les champs
+930 restent séparés dans `locations`. Les zéros initiaux des RCR sont préservés.
+
+`validation_status=user_confirmed_930b` et le champ `holdings_validation` du
+rapport enregistrent cette validation de la source. Le rapport indique la clé
+`holdings_deduplication_key`, le nombre de couples dans `counts.holdings` et le
+nombre d'occurrences regroupées dans `counts.duplicate_rcr_occurrences_collapsed`.
+Les versions antérieures utilisaient `holdings_observed` ; leurs sorties restent
+conservées dans leurs dossiers respectifs.
 
 Les sous-zones $5 de toutes les zones sont conservées dans `local_links_5`.
 Quand leur valeur suit le motif `RCR:identifiant_exemplaire`, les deux parties
@@ -144,9 +164,9 @@ porte `match`, `mismatch` ou `not_comparable`. Aucun $5 ne remplace un $b manqua
 Les candidats présents uniquement dans d'autres zones apparaissent dans le CSV
 de vérification, sans être promus en bibliothèques possédantes.
 
-La concordance $b/$5 est seulement un contrôle interne de la réponse XML :
-elle ne démontre pas que le SRU a fourni toutes les localisations du catalogue.
-La comparaison externe reste à faire après cette étape.
+La concordance $b/$5 reste un contrôle interne de la réponse XML. La validation
+de la source est celle fournie par l'utilisateur ; le script n'effectue aucune
+validation externe supplémentaire ni nouvelle collecte.
 
 Références : [100 et dates d'échange](https://documentation.abes.fr/sudoc/formats/unmb/zones/100.htm),
 [rôles des mentions 214](https://documentation.abes.fr/sudoc/formats/unmb/zones/214.htm),

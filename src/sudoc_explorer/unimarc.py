@@ -13,7 +13,7 @@ from lxml import etree
 
 from sudoc_explorer.sudoc import NS, now, parse_page, write_json
 
-PARSER_VERSION = "0.3.4"
+PARSER_VERSION = "0.3.6"
 AUTHOR_TAGS = {"700", "701", "702", "710", "711", "712"}
 SUBJECT_TAGS = {str(tag) for tag in range(600, 621)}
 ARK_ALPHABET = "0123456789bcdfghjkmnpqrstvwxz"
@@ -169,7 +169,7 @@ def parse_record(record, source):
             if item["rcr"]:
                 holding_evidence[item["rcr"]].append({**ref(f), "subfield_index": item["subfield_index"],
                                                      "raw": item["raw"], "comparison_b_5": comparison})
-    holdings = [{"rcr": rcr, "evidence": evidence, "validation_status": "unverified_930b"}
+    holdings = [{"rcr": rcr, "evidence": evidence, "validation_status": "user_confirmed_930b"}
                 for rcr, evidence in sorted(holding_evidence.items())]
     return {"ppn": ppn, "source": source, "bnf_links": bnf_links, "summaries": summaries,
             "leader_raw": [n.text or "" for n in children(record, "leader")],
@@ -181,7 +181,7 @@ def parse_record(record, source):
             "publication_year_source": "100$a[9:13]" if publication_year is not None else None,
             "publication_statements": publication_statements, "languages": languages, "countries": countries,
             "publishers": publishers, "authors": authors, "classifications": classifications, "subjects": subjects,
-            "locations": locations, "local_links_5": local_links, "holdings_observed": holdings}
+            "locations": locations, "local_links_5": local_links, "holdings": holdings}
 
 
 def iter_campaign(run_dir, report):
@@ -230,7 +230,10 @@ def extract_campaign(run_dir: Path, output_dir: Path):
               "source_run": str(run_dir), "source_report_sha256": hashlib.sha256(input_bytes).hexdigest(),
               "collection_id": collection["collection_id"], "source_collection_status": collection["status"],
               "expected_records": collection["records_validated"], "records_parsed": 0,
-              "holdings_validation": "pending_external_comparison", "errors": []}
+              "records_retained": 0, "records_excluded": 0, "exclusions": [],
+              "retention_rule": "at_least_one_nonempty_930b",
+              "holdings_validation": "user_confirmed_930b", "holdings_deduplication_key": ["ppn", "rcr"],
+              "errors": []}
     write_json(output_dir / "report.json", result)
     counts = Counter()
     histogram = Counter()
@@ -240,7 +243,8 @@ def extract_campaign(run_dir: Path, output_dir: Path):
     files = {"documents": None, "bnf_links": "bnf_links", "summaries": "summaries",
              "publishers": "publishers", "authors": "authors",
              "classifications": "classifications", "subjects": "subjects",
-             "locations": "locations", "holdings_observed": "holdings_observed"}
+             "locations": "locations", "holdings": "holdings"}
+    counts.update({name: 0 for name in files})
     try:
         with ExitStack() as stack:
             streams = {name: stack.enter_context((output_dir / f"{name}.jsonl").open("w", encoding="utf-8", newline="\n"))
@@ -251,6 +255,14 @@ def extract_campaign(run_dir: Path, output_dir: Path):
                 "comparaisons_930b_5_en_desaccord", "valeurs_930b_invalides"], delimiter=";")
             writer.writeheader()
             for document in iter_campaign(run_dir, collection):
+                result["records_parsed"] += 1
+                if not any(item["value"] is not None for location in document["locations"]
+                           for item in location["rcr_values"]):
+                    result["records_excluded"] += 1
+                    result["exclusions"].append({"ppn": document["ppn"], "source": document["source"],
+                                                 "reason": "missing_or_empty_930b"})
+                    continue
+                result["records_retained"] += 1
                 for name, key in files.items():
                     rows = [document] if key is None else [{"ppn": document["ppn"], "source": document["source"], **row}
                                                           for row in document[key]]
@@ -265,7 +277,8 @@ def extract_campaign(run_dir: Path, output_dir: Path):
                 counts["bnf_links_from_033a"] += sum(link["origin"] == "033a" for link in document["bnf_links"])
                 counts["bnf_links_from_035a"] += sum(link["origin"] == "035a" for link in document["bnf_links"])
                 counts["records_with_bnf_links_from_035a"] += any(link["origin"] == "035a" for link in document["bnf_links"])
-                observed = {h["rcr"] for h in document["holdings_observed"]}
+                observed = {h["rcr"] for h in document["holdings"]}
+                counts["duplicate_rcr_occurrences_collapsed"] += sum(len(h["evidence"]) - 1 for h in document["holdings"])
                 candidates = {link["rcr_candidate"] for link in document["local_links_5"] if link["rcr_candidate"]}
                 conflicts = sum(loc["comparison_b_5"] == "mismatch" for loc in locations)
                 invalid = sum(item["rcr"] is None for loc in locations for item in loc["rcr_values"])
@@ -279,7 +292,6 @@ def extract_campaign(run_dir: Path, output_dir: Path):
                     "zones_930": len(locations), "rcr_distincts_930b": len(observed), "rcr_930b": " | ".join(sorted(observed)),
                     "rcr_candidats_5": " | ".join(sorted(candidates)), "rcr_5_absents_de_930b": " | ".join(sorted(candidates-observed)),
                     "comparaisons_930b_5_en_desaccord": conflicts, "valeurs_930b_invalides": invalid})
-                result["records_parsed"] += 1
         result.update(status="complete", counts=dict(counts), subjects_by_field=dict(sorted(subject_fields.items())),
                       zones_930_per_record=dict(sorted(histogram.items())),
                       distinct_rcr_per_record=dict(sorted(rcr_histogram.items())), distinct_rcr=len(rcrs_seen))

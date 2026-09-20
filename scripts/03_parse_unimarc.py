@@ -20,8 +20,9 @@ def main(argv=None):
     try:
         report = extract_campaign(args.run_dir, output)
         print(f"{report['records_parsed']} notices extraites ; {report['counts']['locations']} zones 930.")
+        print(f"{report['records_retained']} notices conservées ; {report['records_excluded']} exclues sans 930$b.")
         print(f"Sortie : {output.resolve()}")
-        print("Localisations observées uniquement : exhaustivité non vérifiée.")
+        print(f"{report['counts']['holdings']} couples PPN/RCR distincts ; source 930$b validée par l'utilisateur.")
         return 0
     except (OSError, ValueError, KeyError) as exc:
         print(f"Échec : {exc}", file=sys.stderr)

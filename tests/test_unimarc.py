@@ -105,9 +105,10 @@ class RecordTests(unittest.TestCase):
 
     def test_930_evidence_is_not_collapsed_or_inferred(self):
         self.assertEqual(len(self.doc["locations"]), 5)
-        holdings = self.doc["holdings_observed"]
+        holdings = self.doc["holdings"]
         self.assertEqual([h["rcr"] for h in holdings], ["040702201", "751032301"])
         self.assertEqual(len(holdings[0]["evidence"]), 2)
+        self.assertEqual(holdings[0]["validation_status"], "user_confirmed_930b")
         self.assertEqual(self.doc["locations"][2]["comparison_b_5"], "mismatch")
         self.assertEqual(self.doc["locations"][3]["comparison_b_5"], "not_comparable")
         self.assertIsNone(self.doc["locations"][4]["rcr_values"][0]["rcr"])
@@ -119,7 +120,7 @@ class RecordTests(unittest.TestCase):
         self.assertIsNone(doc["title"])
         self.assertIsNone(doc["publication_year"])
         self.assertEqual(doc["classifications"], [])
-        self.assertEqual(doc["holdings_observed"], [])
+        self.assertEqual(doc["holdings"], [])
         self.assertEqual(doc["subjects"], [])
         self.assertEqual(doc["bnf_links"], [])
         self.assertEqual(doc["summaries"], [])
@@ -241,7 +242,16 @@ class CampaignTests(unittest.TestCase):
         self.assertEqual(subjects[0]["ppn"], doc["ppn"])
         self.assertEqual(subjects[0]["source"], doc["source"])
         self.assertEqual(subjects[0]["subfields"], doc["subjects"][0]["subfields"])
-        self.assertGreater(len(doc["locations"]), len(doc["holdings_observed"]))
+        self.assertGreater(len(doc["locations"]), len(doc["holdings"]))
+        holdings = [json.loads(line) for line in (self.output / "holdings.jsonl").read_text(encoding="utf-8").splitlines()]
+        pairs = [(h["ppn"], h["rcr"]) for h in holdings]
+        self.assertEqual(len(pairs), len(set(pairs)))
+        self.assertEqual(report["counts"]["holdings"], len(holdings))
+        self.assertEqual(report["counts"]["duplicate_rcr_occurrences_collapsed"],
+                         sum(len(h["evidence"]) - 1 for h in holdings))
+        self.assertGreater(report["counts"]["duplicate_rcr_occurrences_collapsed"], 0)
+        self.assertEqual(report["holdings_validation"], "user_confirmed_930b")
+
         with (self.output / "localisations_a_verifier.csv").open(encoding="utf-8-sig", newline="") as stream:
             rows = list(csv.DictReader(stream, delimiter=";"))
         self.assertEqual(rows[0]["page_file"], "pages/0/000000001.xml")
@@ -322,6 +332,46 @@ class CampaignTests(unittest.TestCase):
     def test_output_cannot_be_inside_raw(self):
         with self.assertRaisesRegex(ValueError, "distinct"):
             extract_campaign(self.run, self.run / "extracted")
+
+    def test_notices_without_930b_are_excluded_from_all_exports(self):
+        root = etree.fromstring(self.page_path.read_bytes())
+        record = root.find('.//{http://www.loc.gov/zing/srw/}recordData/record')
+        for field in record.findall('datafield[@tag="930"]'):
+            for sub in field.findall('subfield[@code="b"]'):
+                field.remove(sub)
+        raw = etree.tostring(root)
+        self.page_path.write_bytes(raw)
+        self.report["partitions"][0]["pages"][0]["sha256"] = hashlib.sha256(raw).hexdigest()
+        self.save_report()
+        result = extract_campaign(self.run, self.output)
+        self.assertEqual(result["records_parsed"], 1)
+        self.assertEqual(result["records_retained"], 0)
+        self.assertEqual(result["records_excluded"], 1)
+        self.assertEqual(result["exclusions"][0]["ppn"], "029392810")
+        for path in self.output.glob("*.jsonl"):
+            self.assertEqual(path.read_text(encoding="utf-8"), "", path.name)
+        self.assertEqual(result["counts"]["documents"], 0)
+        with (self.output / "localisations_a_verifier.csv").open(encoding="utf-8-sig", newline="") as stream:
+            self.assertEqual(list(csv.DictReader(stream, delimiter=";")), [])
+
+    def test_empty_930b_is_excluded_but_nonempty_invalid_b_remains_reportable(self):
+        root = etree.fromstring(self.page_path.read_bytes())
+        fields = root.findall('.//{http://www.loc.gov/zing/srw/}recordData/record/datafield[@tag="930"]/subfield[@code="b"]')
+        for sub in fields:
+            sub.text = "   "
+        raw = etree.tostring(root)
+        self.page_path.write_bytes(raw)
+        self.report["partitions"][0]["pages"][0]["sha256"] = hashlib.sha256(raw).hexdigest()
+        self.save_report()
+        self.assertEqual(extract_campaign(self.run, self.output)["records_excluded"], 1)
+        fields[0].text = "invalid"
+        raw = etree.tostring(root)
+        self.page_path.write_bytes(raw)
+        self.report["partitions"][0]["pages"][0]["sha256"] = hashlib.sha256(raw).hexdigest()
+        self.save_report()
+        result = extract_campaign(self.run, self.base / "other")
+        self.assertEqual(result["records_retained"], 1)
+        self.assertEqual(result["counts"]["invalid_930b_values"], len(fields))
 
 
 if __name__ == "__main__":

@@ -61,6 +61,14 @@ class PageTests(unittest.TestCase):
     def test_zero_is_a_valid_empty_result(self):
         self.assertEqual(parse_page(response_xml(), 1, 100).total, 0)
 
+    def test_zero_with_position_diagnostic(self):
+        raw = response_xml().replace(b"diagnostic/1/0", b"diagnostic/1/61")
+        self.assertEqual(parse_page(raw, 1, 200).total, 0)
+        with self.assertRaises(SruError):
+            parse_page(raw, 2, 200)
+        with self.assertRaises(SruError):
+            parse_page(raw.replace(b">0</s:numberOfRecords>", b">2</s:numberOfRecords>"), 1, 200)
+
     def test_bad_pages_are_rejected(self):
         valid = response_xml(["029392810"])
         cases = [b"<html>unavailable</html>", b"<broken", response_xml(total=1),
@@ -93,6 +101,29 @@ class PageTests(unittest.TestCase):
 
 
 class CollectionTests(unittest.TestCase):
+    def test_record_limit_across_prefixes_and_resume(self):
+        self.data = {"0": [f"{i:09d}" for i in range(2)],
+                     "1": [f"{100000000+i:09d}" for i in range(8)],
+                     "2": [f"{200000000+i:09d}" for i in range(3000)]}
+        def handler(request):
+            params = request.url.params
+            self.calls.append(dict(params))
+            data = self.data.get(params["query"][4], [])
+            start, size = int(params["startRecord"]), int(params["maximumRecords"])
+            return httpx.Response(200, content=response_xml(
+                data[start-1:start-1+size], total=len(data), start=start, query=params["query"]))
+        report = self.collect(handler)
+        self.assertEqual(report["status"], "limited")
+        self.assertEqual(report["records_validated"], 2000)
+        self.assertEqual(report["distinct_ppns"], 2000)
+        self.assertEqual(len(self.calls), 12)
+        self.assertEqual(int(self.calls[-1]["maximumRecords"]), 190)
+        self.calls.clear()
+        self.assertEqual(self.collect(handler)["records_validated"], 2000)
+        self.assertEqual(self.calls, [])
+        with self.assertRaises(ValueError):
+            self.collect(handler, max_records=2001)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)

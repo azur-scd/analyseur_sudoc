@@ -5,7 +5,10 @@
 Référence : [Guide d'utilisation SRU du catalogue Sudoc, Abes](https://abes.fr/guide-utilisation-service-sru-catalogue-sudoc/).
 Le collecteur utilise `https://www.sudoc.abes.fr/cbs/sru/`, SRU 1.1,
 `operation=searchRetrieve`, `recordSchema=unimarc`, `recordPacking=xml`.
-La taille de page est configurable de 1 à 1 000, avec 100 par défaut.
+La taille de page est configurable de 1 à 1 000, avec 200 par défaut.
+Le plafond `--max-records` est fixé à 2 000 par défaut, cache compris, et
+enregistré dans le manifeste. La dernière requête demande seulement le reliquat.
+Aucune collecte complète ne doit être lancée sans demande explicite de l'utilisateur.
 
 Les limitations APU et TDO nécessitent un index de recherche. Le 19 septembre
 2026, `apu=2025 and (tdo=b or tdo=x)` et les recherches avec `ppn=*` ou `tou=*`
@@ -34,7 +37,7 @@ Une page sans son fichier de métadonnées sera redemandée à la reprise. Une p
 dont le SHA-256 a changé est signalée comme corrompue ; elle n'est pas réutilisée.
 Une seule exécution doit utiliser un dossier de campagne à la fois.
 
-Une reprise conserve l'année, la taille de page, les requêtes et la version du
+Une reprise conserve l'année, le plafond de notices, la taille de page, les requêtes et la version du
 collecteur. Un changement nécessite une nouvelle campagne. Le rapport est recalculé
 depuis les pages disponibles ; ses comptes ne sont pas incrémentés une seconde fois.
 La limite `--max-pages` porte sur le total de pages de la campagne, cache compris.
@@ -43,6 +46,8 @@ La limite `--max-pages` porte sur le total de pages de la campagne, cache compri
 
 - Diagnostics SRU contrôlés avant les comptes ; le diagnostic vide `1/0` observé
   sur les réponses réussies est accepté.
+- Le diagnostic `1/61` est accepté uniquement à la position 1 si le serveur
+  annonce explicitement zéro résultat et ne renvoie aucune notice.
 - Requête renvoyée par le serveur comparée à la requête envoyée.
 - XML strict, sans résolution d'entités externes ni DTD.
 - Schéma UNIMARC, encapsulation XML, positions contiguës, champ `001` exploitable.

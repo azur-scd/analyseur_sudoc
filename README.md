@@ -94,10 +94,11 @@ Essai de pagination sur deux pages, avec une notice par page :
 .\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025 --page-size 1 --max-pages 2
 ```
 
-Collecte annuelle complète, par pages de 100 notices :
+Collecte de travail : au maximum **2 000 notices**, par pages de **200**.
+Aucune collecte complète ne doit être lancée sans demande explicite de l'utilisateur.
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025
+.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025 --page-size 200 --max-records 2000
 ```
 
 Le script parcourt les dix préfixes PPN numériques, de `0` à `9`, en appliquant
@@ -107,13 +108,19 @@ Cette étape collecte les candidats du corpus ; la validation métier du support
 physique et des exclusions sera effectuée lors du parsing UNIMARC (V0.3).
 
 Pour reprendre une campagne, fournir le même dossier, la même année et la même
-taille de page. Retirer `--max-pages` pour poursuivre un essai limité :
+taille de page et le même plafond `--max-records`. Retirer `--max-pages` peut
+poursuivre un essai, mais ne supprime jamais le plafond de notices :
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025 --page-size 1 --run-dir data/raw/sudoc/2025/<campagne>
+.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025 --page-size 200 --max-records 2000 --run-dir data/raw/sudoc/2025/<campagne>
 ```
 
 Les pages déjà présentes sont vérifiées et réutilisées. `manifest.json` conserve
+le plafond de notices, qui inclut les pages en cache. La dernière requête est
+réduite au nombre restant : les pages courtes des préfixes précédents comptent
+dans les 2 000 notices. Les anciennes campagnes sans plafond enregistré
+nécessitent un nouveau dossier avec cette version.
+`manifest.json` conserve également
 les paramètres, `report.json` les comptes par préfixe et le statut de la campagne.
 Les réponses rejetées sont conservées dans `rejected/`. Aucun chargement du
 corpus dans DuckDB n'est effectué à ce stade.

@@ -1,5 +1,10 @@
 # Sudoc Explorer
 
+Le contrôle statistique des extractions est disponible dans
+`scripts/04_audit_unimarc.py` : pays, langues, dates, Dewey, indexations,
+résumés et signaux de documents hors périmètre. Voir les commandes, fichiers
+produits et limites dans [la documentation de l'audit](docs/quality-audit.md).
+
 Application locale d'exploration et d'analyse des collections signalées dans le Sudoc.
 
 ## Documentation

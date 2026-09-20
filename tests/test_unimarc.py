@@ -122,6 +122,29 @@ class RecordTests(unittest.TestCase):
         self.assertEqual(doc["holdings_observed"], [])
         self.assertEqual(doc["subjects"], [])
         self.assertEqual(doc["bnf_links"], [])
+        self.assertEqual(doc["summaries"], [])
+
+    def test_summaries_repeated_fields_subfields_and_raw_text(self):
+        first = etree.SubElement(self.record, "datafield", tag="330", ind1="1", ind2=" ")
+        etree.SubElement(first, "subfield", code="a").text = "  Résumé français.\nSuite.  "
+        etree.SubElement(first, "subfield", code="a").text = "Another abstract."
+        etree.SubElement(first, "subfield", code="b").text = "Source du résumé"
+        second = etree.SubElement(self.record, "datafield", tag="330", ind1=" ", ind2=" ")
+        etree.SubElement(second, "subfield", code="a").text = "Another abstract."
+        etree.SubElement(second, "subfield", code="a")
+        third = etree.SubElement(self.record, "datafield", tag="330")
+        etree.SubElement(third, "subfield", code="b").text = "Sans résumé"
+        for node in self.record.iter():
+            node.tag = "{http://www.loc.gov/MARC21/slim}" + node.tag
+        summaries = parse_record(self.record, self.source)["summaries"]
+        self.assertEqual(len(summaries), 4)
+        self.assertEqual(summaries[0]["raw"], "  Résumé français.\nSuite.  ")
+        self.assertEqual(summaries[0]["value"], "Résumé français. Suite.")
+        self.assertEqual(summaries[0]["ind1"], "1")
+        self.assertEqual([s["occurrence"] for s in summaries], [1, 1, 2, 2])
+        self.assertEqual([s["subfield_index"] for s in summaries], [1, 2, 1, 2])
+        self.assertEqual(summaries[1]["value"], summaries[2]["value"])
+        self.assertIsNone(summaries[3]["value"])
 
     def test_bnf_links_filter_repeated_fields_and_preserve_url(self):
         url = "https://catalogue.bnf.fr/ark:/12148/cb123456789?x=1&y=2"
@@ -231,6 +254,27 @@ class CampaignTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Empreinte"):
             extract_campaign(self.run, self.output)
         self.assertEqual(json.loads((self.output / "report.json").read_text())["status"], "failed")
+
+    def test_summaries_export_and_provenance(self):
+        root = etree.fromstring(self.page_path.read_bytes())
+        record = root.find('.//{http://www.loc.gov/zing/srw/}recordData/record')
+        for old in record.findall('datafield[@tag="330"]'):
+            record.remove(old)
+        for text in ["Premier résumé.", "Second résumé."]:
+            field = etree.SubElement(record, "datafield", tag="330")
+            etree.SubElement(field, "subfield", code="a").text = text
+        raw = etree.tostring(root)
+        self.page_path.write_bytes(raw)
+        self.report["partitions"][0]["pages"][0]["sha256"] = hashlib.sha256(raw).hexdigest()
+        self.save_report()
+        report = extract_campaign(self.run, self.output)
+        summaries = [json.loads(line) for line in (self.output / "summaries.jsonl").read_text(encoding="utf-8").splitlines()]
+        doc = json.loads((self.output / "documents.jsonl").read_text(encoding="utf-8"))
+        self.assertEqual([s["value"] for s in summaries], ["Premier résumé.", "Second résumé."])
+        self.assertEqual(report["counts"]["summaries"], 2)
+        self.assertEqual(report["counts"]["records_with_summaries"], 1)
+        for item, nested in zip(summaries, doc["summaries"]):
+            self.assertEqual(item, {"ppn": doc["ppn"], "source": doc["source"], **nested})
 
     def test_bnf_links_export(self):
         root = etree.fromstring(self.page_path.read_bytes())

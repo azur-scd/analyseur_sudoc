@@ -152,6 +152,9 @@ ni écriture dans DuckDB n'est effectuée.
 - `subjects.jsonl` : toutes les occurrences des zones 600 à 620 incluses,
   avec indicateurs et sous-zones ordonnées (code, valeur brute et normalisée).
   Ces indexations sont aussi présentes dans `documents.jsonl`, sous `subjects`.
+- `summaries.jsonl` : tous les résumés en `330$a`, y compris les occurrences
+  répétées, avec texte brut, texte normalisé et provenance ; également présents
+  sous `summaries` dans `documents.jsonl`.
 - `bnf_links.jsonl` : valeurs des `033$a` contenant `catalogue.bnf`, avec URL,
   valeur brute, PPN et provenance ; à défaut de lien BnF en 033$a, URL calculées
   à partir des huit chiffres après `FRBNF` dans les `035$a` (clé ARK modulo 29).

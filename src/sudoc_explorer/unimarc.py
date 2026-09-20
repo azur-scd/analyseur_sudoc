@@ -13,7 +13,7 @@ from lxml import etree
 
 from sudoc_explorer.sudoc import NS, now, parse_page, write_json
 
-PARSER_VERSION = "0.3.3"
+PARSER_VERSION = "0.3.4"
 AUTHOR_TAGS = {"700", "701", "702", "710", "711", "712"}
 SUBJECT_TAGS = {str(tag) for tag in range(600, 621)}
 ARK_ALPHABET = "0123456789bcdfghjkmnpqrstvwxz"
@@ -119,6 +119,7 @@ def parse_record(record, source):
     for field in fields:
         grouped[field["source_field"]].append(field)
     bnf_links = extract_bnf_links(grouped)
+    summaries = [{**ref(f), **item} for f in grouped["330"] for item in field_values(f, "a")]
     titles = [{**ref(f), "main_titles": field_values(f, "a"), "subtitles": field_values(f, "e"),
                "parallel_titles": field_values(f, "d"), "part_numbers": field_values(f, "h"),
                "part_titles": field_values(f, "i")} for f in grouped["200"]]
@@ -170,7 +171,7 @@ def parse_record(record, source):
                                                      "raw": item["raw"], "comparison_b_5": comparison})
     holdings = [{"rcr": rcr, "evidence": evidence, "validation_status": "unverified_930b"}
                 for rcr, evidence in sorted(holding_evidence.items())]
-    return {"ppn": ppn, "source": source, "bnf_links": bnf_links,
+    return {"ppn": ppn, "source": source, "bnf_links": bnf_links, "summaries": summaries,
             "leader_raw": [n.text or "" for n in children(record, "leader")],
             "controlfields": [{"tag": n.get("tag"), "raw": n.text or ""} for n in children(record, "controlfield")],
             "source_fields": fields, "titles": titles,
@@ -236,7 +237,8 @@ def extract_campaign(run_dir: Path, output_dir: Path):
     rcr_histogram = Counter()
     subject_fields = Counter()
     rcrs_seen = set()
-    files = {"documents": None, "bnf_links": "bnf_links", "publishers": "publishers", "authors": "authors",
+    files = {"documents": None, "bnf_links": "bnf_links", "summaries": "summaries",
+             "publishers": "publishers", "authors": "authors",
              "classifications": "classifications", "subjects": "subjects",
              "locations": "locations", "holdings_observed": "holdings_observed"}
     try:
@@ -258,6 +260,7 @@ def extract_campaign(run_dir: Path, output_dir: Path):
                 locations = document["locations"]
                 subject_fields.update(subject["source_field"] for subject in document["subjects"])
                 counts["records_with_subjects"] += bool(document["subjects"])
+                counts["records_with_summaries"] += any(item["value"] is not None for item in document["summaries"])
                 counts["records_with_bnf_links"] += bool(document["bnf_links"])
                 counts["bnf_links_from_033a"] += sum(link["origin"] == "033a" for link in document["bnf_links"])
                 counts["bnf_links_from_035a"] += sum(link["origin"] == "035a" for link in document["bnf_links"])

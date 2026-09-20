@@ -5,7 +5,7 @@ Ce document centralise les choix de mapping UNIMARC utilisés par le projet.
 
 > Important : les règles ci-dessous constituent le mapping initial. Elles devront être vérifiées et complétées à partir des notices Sudoc réellement rencontrées.
 
-## Extraction implémentée (V0.3.3, étape 1)
+## Extraction implémentée (V0.3.4, étape 1)
 
 Le script `scripts/03_parse_unimarc.py` lit uniquement les pages validées du
 rapport de collecte et vérifie leurs empreintes SHA-256. Il produit des JSONL
@@ -88,6 +88,22 @@ sur le catalogue BnF. En l'absence des deux sources, `bnf_links` reste une liste
 Le rapport fournit `counts.bnf_links`, `counts.records_with_bnf_links`,
 `counts.bnf_links_from_033a`, `counts.bnf_links_from_035a` et
 `counts.records_with_bnf_links_from_035a`.
+
+### Résumés en 330$a
+
+Chaque sous-zone $a de chaque zone 330 est extraite dans la liste `summaries`.
+Les zones et sous-zones répétées sont conservées dans l'ordre du XML, même si
+leurs textes sont identiques. Le script ne fusionne ni ne traduit les résumés.
+
+Chaque objet contient `raw` (texte original), `value` (normalisation textuelle
+décrite plus haut), `source_field`, `field_index`, `occurrence`, `ind1`, `ind2`
+et `subfield_index`. Les autres sous-zones de 330 restent dans `source_fields`.
+Sans 330$a, la liste est vide ; un $a vide reste conservé avec `value=null`.
+
+Les résumés figurent dans `documents.jsonl` sous `summaries`, ainsi que dans
+`summaries.jsonl` (une occurrence de $a par ligne avec PPN et provenance XML).
+`counts.summaries` compte les occurrences extraites, y compris vides ;
+`counts.records_with_summaries` compte les notices avec au moins un résumé non vide.
 
 ### Indexations des zones 600 à 620
 

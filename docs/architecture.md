@@ -191,6 +191,10 @@ Ne sont pas versionnés :
 
 ## V0.2 — Collecte Sudoc
 
+Implémentée dans `sudoc.py` et `scripts/02_fetch_sudoc.py`.
+Voir [les règles de collecte SRU](sru-collection.md) pour le découpage par
+préfixe PPN, la reprise et la portée du contrôle d'exhaustivité.
+
 - année paramétrable ;
 - requête SRU ;
 - pagination ;

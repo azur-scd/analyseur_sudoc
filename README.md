@@ -26,6 +26,7 @@ Application locale d'exploration et d'analyse des collections signalées dans le
 ## Statut
 
 V0.1 : collecte du référentiel RCR, enrichissement IdRef et table `LIBRARY` disponibles.
+V0.2 : collecte annuelle Sudoc SRU, reprise des pages XML et rapport d'exhaustivité disponibles.
 
 ## Installation (PowerShell, Python 3.11 ou supérieur)
 
@@ -81,6 +82,50 @@ nécessite toujours le réseau si les JSON ne sont pas déjà en cache.
 est remplacée dans une transaction, les autres tables sont conservées.
 Un échec IdRef produit un rapport et laisse la base intacte (code de sortie 2).
 Les autres erreurs retournent 1 ; le succès retourne 0.
+
+## Collecter le corpus Sudoc d'une année
+
+Après mise à jour du projet, réinstaller les dépendances avec
+`.\.venv\Scripts\python.exe -m pip install -e .` (ajout de `lxml`).
+
+Essai de pagination sur deux pages, avec une notice par page :
+
+```powershell
+.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025 --page-size 1 --max-pages 2
+```
+
+Collecte annuelle complète, par pages de 100 notices :
+
+```powershell
+.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025
+```
+
+Le script parcourt les dix préfixes PPN numériques, de `0` à `9`, en appliquant
+`apu=<année> and (tdo=b or tdo=x)`. Il conserve les réponses SRU contenant les
+notices UNIMARC et les exemplaires dans `data/raw/sudoc/<année>/<campagne>/`.
+Cette étape collecte les candidats du corpus ; la validation métier du support
+physique et des exclusions sera effectuée lors du parsing UNIMARC (V0.3).
+
+Pour reprendre une campagne, fournir le même dossier, la même année et la même
+taille de page. Retirer `--max-pages` pour poursuivre un essai limité :
+
+```powershell
+.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025 --page-size 1 --run-dir data/raw/sudoc/2025/<campagne>
+```
+
+Les pages déjà présentes sont vérifiées et réutilisées. `manifest.json` conserve
+les paramètres, `report.json` les comptes par préfixe et le statut de la campagne.
+Les réponses rejetées sont conservées dans `rejected/`. Aucun chargement du
+corpus dans DuckDB n'est effectué à ce stade.
+
+Un rapport `complete` signifie que toutes les pages des dix préfixes ont été
+validées, avec autant de PPN distincts que de notices annoncées par le serveur.
+Un essai reste `limited`, une erreur `failed`, un arrêt clavier `interrupted`.
+Les codes de sortie correspondants sont 0, 2, 1 et 130. Un code 2 est donc attendu
+pour un essai limité. Une variation des totaux ou des PPN répétés arrête la
+collecte : créer alors une nouvelle campagne pour ne pas mélanger les résultats.
+
+Voir [les choix et limites de la collecte SRU](docs/sru-collection.md).
 
 ## Tests hors réseau
 

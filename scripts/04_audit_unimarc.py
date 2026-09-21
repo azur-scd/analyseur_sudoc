@@ -12,10 +12,11 @@ def main():
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--year", type=int, required=True)
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--scope-validated", action="store_true", help="Traiter les signaux de type/support comme informations sur un lot déjà validé")
     args = parser.parse_args()
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     output = args.output_dir or args.input_dir.resolve().parent / f"audit-{stamp}"
-    stats = audit_extraction(args.input_dir, output, args.year)
+    stats = audit_extraction(args.input_dir, output, args.year, scope_validated=args.scope_validated)
     print(f"{stats['records']} notices analysées. Résultats : {output.resolve()}")
     print(stats["records_by_category"])
 

@@ -5,12 +5,69 @@ import hashlib
 import json
 import re
 import statistics
+from itertools import combinations
 from collections import Counter, defaultdict
 from pathlib import Path
 
 from sudoc_explorer.sudoc import now, write_json
 
-AUDIT_VERSION = "0.2.0"
+AUDIT_VERSION = "0.3.1"
+
+METHODS = ("sudoc_dewey", "bnf_dewey", "idref_dewey", "idref_rameau_domain")
+
+
+def classification_analysis(documents):
+    """Couvertures distinctes ; les répétitions restent des occurrences."""
+    totals = {key: Counter(dict(occurrences=0, usable_occurrences=0, records_present=0, records_usable=0)) for key in METHODS}
+    distributions = {key: Counter() for key in METHODS}
+    covered = {key: set() for key in METHODS}
+    heading_statuses, authority_statuses = Counter(), defaultdict(set)
+    authority_ids = set()
+    rows = []
+    processed = 0
+    for d in documents:
+        available = "idref_606a_links" in d and "idref_606a_classifications" in d
+        processed += available
+        codes = {key: [] for key in METHODS}
+        for v in d["classifications"]:
+            source = v.get("dewey_source", "sudoc:676$a")
+            if source in {"sudoc:676$a", "bnf:676$a"}:
+                codes["sudoc_dewey" if source == "sudoc:676$a" else "bnf_dewey"].append(v["dewey_normalized"])
+        for v in d.get("idref_606a_classifications", []):
+            key = {"dewey": "idref_dewey", "rameau_domain": "idref_rameau_domain"}.get(v["scheme"])
+            if key:
+                codes[key].append(v["code"])
+        links = d.get("idref_606a_links", [])
+        for link in links:
+            heading_statuses[link["status"]] += 1
+            if link.get("authority_ppn"):
+                authority_ids.add(link["authority_ppn"])
+                authority_statuses[link["status"]].add(link["authority_ppn"])
+        row = dict(ppn=d["ppn"], title=d.get("title"), idref_processed=available,
+                   headings_606a=len(links) if available else None,
+                   linked_authorities=len({h["authority_ppn"] for h in links if h.get("authority_ppn")}) if available else None,
+                   heading_statuses=dict(Counter(h["status"] for h in links)))
+        for key, values in codes.items():
+            unique = sorted({v for v in values if v})
+            totals[key]["occurrences"] += len(values)
+            totals[key]["usable_occurrences"] += sum(bool(v) for v in values)
+            totals[key]["records_present"] += bool(values)
+            totals[key]["records_usable"] += bool(unique)
+            distributions[key].update(unique)
+            if unique:
+                covered[key].add(d["ppn"])
+            row[key] = unique
+        rows.append(row)
+    n = len(documents)
+    return dict(records=n, idref_processed_records=processed, unique_linked_authorities=len(authority_ids),
+                heading_statuses=dict(heading_statuses),
+                unique_authorities_by_status={k: len(v) for k, v in authority_statuses.items()},
+                methods={k: {**totals[k], "percent_usable": round(100 * totals[k]["records_usable"] / n, 2) if n else 0,
+                             "unique_codes": len(distributions[k])} for k in METHODS},
+                code_distributions={k: dict(sorted(v.items(), key=lambda x: (-x[1], x[0]))) for k, v in distributions.items()},
+                coverage_overlaps=[dict(method_a=a, method_b=b, both=len(covered[a] & covered[b]),
+                                        only_a=len(covered[a] - covered[b]), only_b=len(covered[b] - covered[a]),
+                                        neither=n-len(covered[a] | covered[b])) for a, b in combinations(METHODS, 2)]), rows
 
 
 def audit_documents(documents, year):
@@ -177,7 +234,7 @@ def audit_documents(documents, year):
                                     for cat in sorted({a["category"] for a in anomalies})}}, anomalies
 
 
-def audit_extraction(input_dir, output_dir, year):
+def audit_extraction(input_dir, output_dir, year, scope_validated=False):
     input_dir, output_dir = Path(input_dir).resolve(), Path(output_dir).resolve()
     if output_dir.is_relative_to(input_dir) or input_dir.is_relative_to(output_dir):
         raise ValueError("La sortie doit être distincte de l'extraction")
@@ -189,16 +246,50 @@ def audit_extraction(input_dir, output_dir, year):
     if extraction["status"] != "complete":
         raise ValueError("Extraction incomplète")
     documents = [json.loads(line) for line in payload.decode("utf-8").splitlines() if line.strip()]
-    if len(documents) != extraction["counts"]["documents"]:
+    expected = extraction.get("records", extraction.get("counts", {}).get("documents"))
+    if len(documents) != expected:
         raise ValueError("Nombre de documents différent du rapport d'extraction")
+    if extraction.get("documents_sha256") and hashlib.sha256(payload).hexdigest() != extraction["documents_sha256"]:
+        raise ValueError("Empreinte des documents différente du rapport")
     stats, anomalies = audit_documents(documents, year)
+    comparisons, comparison_rows = classification_analysis(documents)
+    stats["classification_methods"] = comparisons
+    for d in documents:
+        if "idref_606a_links" not in d:
+            continue
+        for rule, message, selected in [
+            ("idref_606a_unresolved", "606$a sans autorité résolue", [h for h in d["idref_606a_links"] if h["status"] not in {"resolved", "resolved_former_identifier"}]),
+            ("idref_606a_without_classification", "Autorité résolue sans classification retenue", [h for h in d["idref_606a_links"] if h["status"] in {"resolved", "resolved_former_identifier"} and h.get("classification_count") == 0]),
+            ("idref_classification_unusable", "Classification d'autorité conservée mais sans code exploitable par le normaliseur actuel", [v for v in d.get("idref_606a_classifications", []) if not v.get("code")])]:
+            if selected:
+                anomalies.append(dict(ppn=d["ppn"], title=d.get("title"), rule=rule, category="lacune",
+                                      message=message, evidence=selected, source=d["source"]))
+    if scope_validated:
+        for a in anomalies:
+            if a["rule"] in {"academic_work", "original_thesis", "physical_object", "electronic_form", "computer_media", "leader_scope"}:
+                a["category"] = "information_perimetre_valide"
+                a["message"] = "Notice conservée après validation du périmètre. Signal observé : " + a["message"]
+    stats["anomaly_counts"] = dict(Counter(a["rule"] for a in anomalies))
+    stats["records_by_category"] = {cat: len({a["ppn"] for a in anomalies if a["category"] == cat}) for cat in sorted({a["category"] for a in anomalies})}
     stats.update(audit_version=AUDIT_VERSION, created_at=now(), source=str(input_dir),
                  documents_sha256=hashlib.sha256(payload).hexdigest(),
                  extraction_report_sha256=hashlib.sha256(report_bytes).hexdigest(),
-                 parser_version=extraction["parser_version"],
+                 parser_version=extraction.get("parser_version"), enrichment_version=extraction.get("version"),
+                 scope_validated=scope_validated,
                  sampling_warning="Lot limité, non aléatoire, paginé par préfixe PPN : non représentatif de l'année entière.")
     output_dir.mkdir(parents=True, exist_ok=True)
     write_json(output_dir / "statistics.json", stats)
+    with (output_dir / "classification_methods.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+        keys = ["ppn", "title", "idref_processed", "headings_606a", "linked_authorities", "heading_statuses", *METHODS]
+        writer = csv.DictWriter(stream, fieldnames=keys, delimiter=";")
+        writer.writeheader()
+        for row in comparison_rows:
+            writer.writerow({k: json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else v for k, v in row.items()})
+    with (output_dir / "classification_distributions.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.writer(stream, delimiter=";")
+        writer.writerow(["method", "code", "records"])
+        for method, values in comparisons["code_distributions"].items():
+            writer.writerows((method, code, count) for code, count in values.items())
     with (output_dir / "anomalies.jsonl").open("w", encoding="utf-8") as stream:
         for row in anomalies:
             stream.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -217,6 +308,20 @@ def audit_extraction(input_dir, output_dir, year):
              "## Couverture", "", "| Indicateur | Notices | % du lot |", "|---|---:|---:|"]
     for key, value in stats["coverage"].items():
         lines.append(f"| {key} | {value['records']} | {value['percent']} |")
+    lines += ["", "## Classifications par méthode", "",
+              "Les domaines Rameau sont distingués des Dewey. Les couvertures ci-dessous ne mesurent pas l'accord entre les codes.",
+              f"Notices ayant les résultats IdRef : {comparisons['idref_processed_records']} / {comparisons['records']}. Autorités liées distinctes : {comparisons['unique_linked_authorities']}.", "",
+              "| Méthode | Occurrences | Notices avec indice présent | Notices avec code exploitable | % exploitable du lot |", "|---|---:|---:|---:|---:|"]
+    for method, values in comparisons["methods"].items():
+        lines.append(f"| {method} | {values['occurrences']} | {values['records_present']} | {values['records_usable']} | {values['percent_usable']} |")
+    lines += ["", "Les anciennes couvertures `dewey_*` désignent seulement les Dewey bibliographiques Sudoc et BnF.",
+              "Un enrichissement IdRef non effectué n'est pas une absence de classe : vérifier `idref_processed_records` et `idref_processed` dans le CSV.", "",
+              "### Statut des 606$a", "", "| Statut | Occurrences |", "|---|---:|"]
+    lines += [f"| {k} | {v} |" for k, v in comparisons["heading_statuses"].items()]
+    lines += ["", "### Recouvrement des couvertures", "", "| Méthode A | Méthode B | Les deux | A seule | B seule | Aucune |", "|---|---|---:|---:|---:|---:|"]
+    lines += [f"| {r['method_a']} | {r['method_b']} | {r['both']} | {r['only_a']} | {r['only_b']} | {r['neither']} |" for r in comparisons["coverage_overlaps"]]
+    if scope_validated:
+        lines += ["", "Le périmètre documentaire de ce lot a été validé par l'utilisateur : les anciens signaux de type/support sont conservés à titre informatif."]
     for name in ["countries", "languages", "publication_year", "date_type", "dewey_1", "subject_tags", "summaries_per_record", "leader_type_level",
                  "leader_record_type", "leader_bibliographic_level", "content_types_occurrences_per_record",
                  "media_types_occurrences_per_record", "181_a_by_vocabulary", "181_b_by_vocabulary",

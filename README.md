@@ -1,5 +1,8 @@
 # Sudoc Explorer
 
+Les classifications IdRef des autorités liées aux seules `606$a` sont traitées
+séparément : [sélection, structure JSON et accès DuckDB](docs/idref-subject-classifications.md).
+
 Le lot enrichi BnF et IdRef est chargé dans `data/sudoc.duckdb`.
 Voir [l'enrichissement et le schéma DuckDB](docs/enrichment-and-database.md)
 pour les commandes de reprise, la provenance des données et les requêtes SQL.

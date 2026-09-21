@@ -1,6 +1,10 @@
 import unittest
+import json
+import hashlib
+import tempfile
+from pathlib import Path
 
-from sudoc_explorer.quality import audit_documents
+from sudoc_explorer.quality import audit_documents, audit_extraction, classification_analysis
 
 
 def document():
@@ -11,6 +15,53 @@ def document():
 
 
 class QualityTests(unittest.TestCase):
+    def test_classification_methods_count_records_not_repeated_codes(self):
+        d = document()
+        d["classifications"] = [dict(dewey_source="sudoc:676$a", dewey_normalized="005"),
+                                dict(dewey_source="bnf:676$a", dewey_normalized="500")]
+        d["idref_606a_links"] = [dict(authority_ppn="02737372X", status="resolved")] * 2
+        d["idref_606a_classifications"] = [dict(scheme="rameau_domain", code="005")] * 2
+        stats, rows = classification_analysis([d])
+        self.assertEqual(stats["methods"]["idref_rameau_domain"]["occurrences"], 2)
+        self.assertEqual(stats["methods"]["idref_rameau_domain"]["records_usable"], 1)
+        self.assertEqual(stats["methods"]["idref_dewey"]["records_usable"], 0)
+        self.assertEqual(stats["unique_linked_authorities"], 1)
+        self.assertEqual(stats["code_distributions"]["idref_rameau_domain"], {"005": 1})
+        self.assertEqual(rows[0]["idref_rameau_domain"], ["005"])
+        old = document()
+        old["ppn"] = "000000002"
+        stats, rows = classification_analysis([d, old])
+        self.assertEqual(stats["idref_processed_records"], 1)
+        self.assertFalse(rows[1]["idref_processed"])
+        self.assertIsNone(rows[1]["headings_606a"])
+        d["idref_606a_classifications"].append(dict(scheme="dewey", code=None, code_raw="91"))
+        stats, _ = classification_analysis([d])
+        self.assertEqual(stats["methods"]["idref_dewey"]["records_present"], 1)
+        self.assertEqual(stats["methods"]["idref_dewey"]["records_usable"], 0)
+
+    def test_audit_accepts_enriched_report_and_checks_hash(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp) / "input"
+            base.mkdir()
+            d = document()
+            d["idref_606a_links"] = [dict(status="no_identifier", authority_ppn=None)]
+            d["idref_606a_classifications"] = []
+            d["source_fields"] = [{"source_field": "106", "subfields": [{"code": "a", "raw": "s"}]}]
+            payload = (json.dumps(d) + "\n").encode()
+            (base / "documents.jsonl").write_bytes(payload)
+            (base / "report.json").write_text(json.dumps(dict(status="complete", records=1,
+                version="0.1.0", documents_sha256=hashlib.sha256(payload).hexdigest())))
+            output = Path(temp) / "audit"
+            stats = audit_extraction(base, output, 2025, scope_validated=True)
+            self.assertEqual(stats["classification_methods"]["heading_statuses"], {"no_identifier": 1})
+            self.assertEqual(stats["anomaly_counts"]["idref_606a_unresolved"], 1)
+            self.assertIn("information_perimetre_valide", stats["records_by_category"])
+            self.assertNotIn("hors_perimetre", stats["records_by_category"])
+            self.assertTrue((output / "classification_methods.csv").exists())
+            (base / "documents.jsonl").write_bytes(payload + b"\n")
+            with self.assertRaises(ValueError):
+                audit_extraction(base, Path(temp) / "bad", 2025)
+
     def test_new_types_repeat_without_inflating_record_counts(self):
         d = document()
         d["leader_types"] = [dict(record_type="r", bibliographic_level="m", type_code="rm")]

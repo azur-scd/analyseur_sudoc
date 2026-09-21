@@ -1,5 +1,43 @@
 # Audit local des extractions
 
+## Nouveautés v0.3.1 : enrichissements BnF et autorités IdRef
+
+Le même script accepte désormais les rapports d'extraction et d'enrichissement.
+Quand une empreinte des documents figure dans le rapport source, elle est vérifiée.
+Les quatre méthodes sont comptées séparément : Dewey Sudoc, Dewey BnF,
+Dewey 676 des autorités IdRef et domaines Rameau 686 des autorités IdRef.
+La rubrique `classification_methods` de `statistics.json` présente les occurrences,
+les couvertures, les codes distincts, les distributions et les recouvrements
+de couverture entre méthodes. Ces recouvrements ne sont pas des mesures
+d'accord entre les codes, notamment parce que leur granularité diffère.
+
+`classification_methods.csv` donne une ligne par PPN, avec les codes distincts
+de chaque méthode (listes JSON dans les cellules), le statut de traitement IdRef
+et les statuts des 606$a. `classification_distributions.csv` compte une notice
+une seule fois pour chaque couple méthode/code. Les occurrences répétées sont
+comptées séparément dans les statistiques globales.
+
+Le nombre d'autorités liées distinctes et les statuts des liens sont également
+rapportés. Les 606$a sans autorité résolue et les autorités résolues sans classe
+retenue sont signalées avec leurs PPN bibliographiques et preuves. Une extraction
+ancienne sans résultat IdRef est marquée non traitée, sans être assimilée à
+une autorité dépourvue de classification. Les champs historiques `dewey_*`
+restent limités aux classifications bibliographiques Sudoc/BnF.
+
+Pour le lot dont le périmètre a été accepté, `--scope-validated` conserve les
+signaux de type/support comme informations et ne les présente plus comme des
+motifs d'exclusion. Aucun fichier de notices n'est modifié.
+
+```powershell
+.\.venv\Scripts\python.exe scripts/04_audit_unimarc.py --input-dir data/enrichment/sample-2000/idref-606a-v0.1.0 --year 2025 --scope-validated --output-dir data/processed/sudoc/sample-2000/audit-v0.3.1
+```
+
+La présence d'une classification et son caractère exploitable sont distincts.
+Dans le lot IdRef, cinq notices portent un 676$a, dont quatre ont la valeur
+brute `91`, conservée mais non normalisée par les règles actuelles ; seule la
+valeur `912` est exploitable. Ces quatre cas sont listés comme lacunes de
+normalisation dans le rapport, sans transformer ni remplacer les codes.
+
 ## Nouveautés v0.2.0
 
 L'audit exploite les listes `leader_types`, `content_types`, `media_types` et

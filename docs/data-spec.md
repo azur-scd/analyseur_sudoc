@@ -1,6 +1,12 @@
 # Sudoc Explorer
 ## Spécification des données — V1
 
+Mise à jour du lot expérimental : l'utilisateur a validé la conservation des
+1 995 notices, y compris les cas de périmètre litigieux. Le modèle effectivement
+chargé, les champs répétables et la provenance BnF/IdRef sont décrits dans
+[enrichment-and-database.md](enrichment-and-database.md). Les exclusions générales
+ci-dessous décrivent le cadrage initial et ne s'appliquent pas à ce lot validé.
+
 # 1. Sources
 
 ## 1.1. Sudoc SRU

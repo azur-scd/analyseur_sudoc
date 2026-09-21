@@ -1,5 +1,9 @@
 # Sudoc Explorer
 
+Le lot enrichi BnF et IdRef est chargé dans `data/sudoc.duckdb`.
+Voir [l'enrichissement et le schéma DuckDB](docs/enrichment-and-database.md)
+pour les commandes de reprise, la provenance des données et les requêtes SQL.
+
 Le contrôle statistique des extractions est disponible dans
 `scripts/04_audit_unimarc.py` : pays, langues, dates, Dewey, indexations,
 résumés et signaux de documents hors périmètre. Voir les commandes, fichiers

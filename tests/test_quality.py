@@ -11,6 +11,21 @@ def document():
 
 
 class QualityTests(unittest.TestCase):
+    def test_new_types_repeat_without_inflating_record_counts(self):
+        d = document()
+        d["leader_types"] = [dict(record_type="r", bibliographic_level="m", type_code="rm")]
+        field = dict(subfields=[dict(code="c", raw="txt"), dict(code="2", raw="rdacontent")])
+        d["content_types"] = [field, field]
+        d["media_types"] = [dict(subfields=[dict(code="c", raw="c")])]
+        d["nature_of_content"] = [dict(code="a", raw="    av  000yy")]
+        stats, flags = audit_documents([d], 2025)
+        self.assertEqual(stats["distributions"]["leader_type_level"], {"rm": 1})
+        self.assertEqual(list(stats["distributions"]["181_c_by_vocabulary"].values()), [1])
+        self.assertEqual(list(stats["distributions"]["181_c_occurrences"].values()), [2])
+        self.assertEqual(stats["distributions"]["nature_105_position_4"], {"a": 1})
+        self.assertEqual(stats["coverage"]["content_types_coded"]["records"], 1)
+        self.assertIn("computer_media", {f["rule"] for f in flags})
+
     def test_distinct_values_and_missing_coverage(self):
         stats, flags = audit_documents([document()], 2025)
         self.assertEqual(stats["distributions"]["countries"], {"FR": 1})

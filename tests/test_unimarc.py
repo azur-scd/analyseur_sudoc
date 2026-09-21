@@ -7,12 +7,23 @@ from pathlib import Path
 
 from lxml import etree
 
-from sudoc_explorer.unimarc import bnf_ark_url, coded_date, extract_campaign, parse_record
+from sudoc_explorer.unimarc import bnf_ark_url, coded_date, dewey, extract_campaign, parse_record
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
 class RecordTests(unittest.TestCase):
+    def test_dewey_conservative_normalization(self):
+        for raw, expected in [("598.909 4", "598.9094"), ("848.914 03 (oeuvre)", "848.91403"),
+                              ("813.52 (critique)", "813.52"), ("005.1/2 34", "005.1234")]:
+            result = dewey(dict(raw=raw, value=raw))
+            self.assertEqual(result["dewey_normalized"], expected)
+            self.assertEqual(result["dewey_raw"], raw)
+            self.assertTrue(result["dewey_normalization_rules"])
+        self.assertEqual(dewey(dict(raw="813.52 (critique)", value="813.52 (critique)"))["dewey_annotation"], "critique")
+        for raw in ["123 456", "342.1TR", "577.68v23", "B", "[Fic]", "C810.9/9715", "635.9 NZ", "123.4 (567)"]:
+            self.assertIsNone(dewey(dict(raw=raw, value=raw))["dewey_normalized"])
+
     def test_document_types_positions_repetitions_and_missing(self):
         record = etree.fromstring(b'''<record><leader>     nam0 22        450 </leader>
           <controlfield tag="001">000000001</controlfield>

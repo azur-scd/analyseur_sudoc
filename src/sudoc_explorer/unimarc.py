@@ -13,7 +13,7 @@ from lxml import etree
 
 from sudoc_explorer.sudoc import NS, now, parse_page, write_json
 
-PARSER_VERSION = "0.3.7"
+PARSER_VERSION = "0.3.8"
 AUTHOR_TAGS = {"700", "701", "702", "710", "711", "712"}
 SUBJECT_TAGS = {str(tag) for tag in range(600, 621)}
 ARK_ALPHABET = "0123456789bcdfghjkmnpqrstvwxz"
@@ -91,10 +91,27 @@ def coded_date(item):
 
 def dewey(item):
     value = item["value"]
-    candidate = value.replace("/", "") if value else ""
+    candidate = value or ""
+    rules = []
+    annotation = None
+    match = re.fullmatch(r"(.+?)\s+\((oeuvre|œuvre|critique)\)", candidate, re.IGNORECASE)
+    if match:
+        candidate, annotation = match.groups()
+        rules.append("separate_literary_annotation")
+    # Espaces autorisés seulement dans une partie décimale déjà identifiée.
+    # Ne jamais transformer deux indices entiers (ex. 123 456) en un seul.
+    if re.fullmatch(r"[0-9]{3}\.[0-9/]+(?: [0-9/]+)+", candidate):
+        candidate = candidate.replace(" ", "")
+        rules.append("remove_decimal_grouping_spaces")
+    if "/" in candidate:
+        candidate = candidate.replace("/", "")
+        rules.append("remove_segmentation_slashes")
     valid = re.fullmatch(r"[0-9]{3}(?:\.[0-9]+)?", candidate) is not None
     normalized = candidate if valid else None
     return {**item, "dewey_raw": item["raw"], "dewey_normalized": normalized,
+            "dewey_source": "sudoc:676$a", "dewey_annotation": annotation,
+            "dewey_normalization_rules": (rules or ["identity"]) if valid else [],
+            "dewey_normalization_status": "normalized" if valid else "unresolved",
             "dewey_1": normalized[:1] if valid else None,
             "dewey_2": normalized[:2] if valid else None,
             "dewey_3": normalized[:3] if valid else None}

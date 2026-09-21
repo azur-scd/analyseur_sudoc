@@ -10,7 +10,7 @@ from pathlib import Path
 
 from sudoc_explorer.sudoc import now, write_json
 
-AUDIT_VERSION = "0.1.0"
+AUDIT_VERSION = "0.2.0"
 
 
 def audit_documents(documents, year):
@@ -112,8 +112,39 @@ def audit_documents(documents, year):
         coverage["dewey_and_subjects_and_summary"] += bool(valid and usable_subjects and summaries)
 
         leaders = d["leader_raw"]
-        kind = leaders[0][6:8] if len(leaders) == 1 and len(leaders[0]) >= 8 else "inconnu"
-        distribute("leader_type_level", [kind])
+        leader_types = d.get("leader_types", [dict(record_type=v[6] if len(v) > 6 else None,
+                            bibliographic_level=v[7] if len(v) > 7 else None,
+                            type_code=v[6:8] if len(v) > 7 else None) for v in leaders])
+        kind = leader_types[0]["type_code"] if len(leader_types) == 1 else None
+        coverage["leader_type_level"] += bool(kind and kind.strip())
+        distribute("leader_type_level", [v["type_code"] or "inconnu" for v in leader_types] or ["inconnu"])
+        distribute("leader_record_type", [v["record_type"] for v in leader_types])
+        distribute("leader_bibliographic_level", [v["bibliographic_level"] for v in leader_types])
+        type_fields = {}
+        for key, tag in [("content_types", "181"), ("media_types", "182")]:
+            occurrences = d.get(key, [f for f in fields if f["source_field"] == tag])
+            type_fields[tag] = occurrences
+            coverage[key + "_present"] += bool(occurrences)
+            distributions[key + "_occurrences_per_record"][str(len(occurrences))] += 1
+            code_values = []
+            for field in occurrences:
+                vocab = sorted({s["raw"].strip() for s in field["subfields"] if s["code"] == "2" and s["raw"].strip()})
+                for sub in field["subfields"]:
+                    if sub["code"] in {"a", "b", "c"} and sub["raw"].strip():
+                        code_values.append((sub["code"], sub["raw"], " + ".join(vocab) or "sans $2"))
+            coverage[key + "_coded"] += bool(code_values)
+            for subcode in ("a", "b", "c"):
+                vals = [json.dumps([vocab, value], ensure_ascii=False) for code, value, vocab in code_values if code == subcode]
+                distribute(f"{tag}_{subcode}_by_vocabulary", vals)
+                distributions[f"{tag}_{subcode}_occurrences"].update(vals)
+            if not code_values:
+                flag(key + "_missing", "lacune", f"Aucun code non vide en {tag}$a/$b/$c", occurrences)
+        first_nature = d.get("nature_of_content", [{"code": v[4] if len(v) > 4 else None, "raw": v} for v in raw("105", "a")])
+        meaningful = [v["code"] for v in first_nature if v["code"] not in {None, "", " ", "|", "#"}]
+        coverage["nature_105_position_4"] += bool(meaningful)
+        distribute("nature_105_position_4", [v["code"] if v["code"] is not None else "champ_court" for v in first_nature] or ["absent"])
+        if not meaningful:
+            flag("nature_105_position_4_missing", "lacune", "105$a position 4 absent, court ou non renseigné", first_nature)
         if kind not in {"am", "rm"}:
             flag("leader_scope", "a_verifier", "Type/niveau du label différent des am/rm observés dans le lot", leaders)
         if kind == "rm":
@@ -122,7 +153,7 @@ def audit_documents(documents, year):
         distribute("form_106a", forms)
         if "s" in forms:
             flag("electronic_form", "hors_perimetre", "106$a=s : forme électronique", forms)
-        media = raw("182", "c")
+        media = [s["raw"] for f in type_fields["182"] for s in f["subfields"] if s["code"] == "c"]
         if "c" in media:
             flag("computer_media", "a_verifier", "182$c=c : médiation informatique, vérifier le support et les accompagnements", media)
         # Le SRU exporte la nature du contenu dans 105$a positions 4–7, pas 105$b.
@@ -186,9 +217,13 @@ def audit_extraction(input_dir, output_dir, year):
              "## Couverture", "", "| Indicateur | Notices | % du lot |", "|---|---:|---:|"]
     for key, value in stats["coverage"].items():
         lines.append(f"| {key} | {value['records']} | {value['percent']} |")
-    for name in ["countries", "languages", "publication_year", "date_type", "dewey_1", "subject_tags", "summaries_per_record", "leader_type_level"]:
+    for name in ["countries", "languages", "publication_year", "date_type", "dewey_1", "subject_tags", "summaries_per_record", "leader_type_level",
+                 "leader_record_type", "leader_bibliographic_level", "content_types_occurrences_per_record",
+                 "media_types_occurrences_per_record", "181_a_by_vocabulary", "181_b_by_vocabulary",
+                 "181_c_by_vocabulary", "182_a_by_vocabulary", "182_b_by_vocabulary", "182_c_by_vocabulary",
+                 "nature_105_position_4", "nature_105_positions_4_7"]:
         lines += ["", f"## Distribution : {name}", "", "| Valeur | Notices |", "|---|---:|"]
-        lines += [f"| {key} | {value} |" for key, value in stats["distributions"].get(name, {}).items()]
+        lines += [f"| {str(key).replace('|', '&#124;') if str(key).strip() else '(espace)'} | {value} |" for key, value in stats["distributions"].get(name, {}).items()]
     lines += ["", "## Anomalies et points à examiner", "", "Les lacunes ne sont pas des erreurs de catalogage. Chaque règle ci-dessous liste tous les PPN concernés.",
               "Les preuves complètes, titres et fichiers XML sources figurent dans anomalies.csv et anomalies.jsonl."]
     for rule, count in stats["anomaly_counts"].items():

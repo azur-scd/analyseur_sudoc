@@ -5,7 +5,7 @@ Ce document centralise les choix de mapping UNIMARC utilisés par le projet.
 
 > Important : les règles ci-dessous constituent le mapping initial. Elles devront être vérifiées et complétées à partir des notices Sudoc réellement rencontrées.
 
-## Extraction implémentée (V0.3.7, étape 1)
+## Extraction implémentée (V0.3.8, étape 1)
 
 Le script `scripts/03_parse_unimarc.py` lit uniquement les pages validées du
 rapport de collecte et vérifie leurs empreintes SHA-256. Il produit des JSONL
@@ -62,8 +62,15 @@ l'ordre original. Le rapport d'extraction est distinct du rapport de collecte.
   une subdivision et ne devient pas un prénom.
 - Chaque 676$a est conservé. Une notation composée de trois chiffres suivis
   éventuellement de décimales est normalisée ; les barres de segmentation sont
-  retirées (ex. `746.9/7/0996` → `746.970996`). Les autres notations restent
-  brutes avec niveaux nuls. Une absence de Dewey ne devient jamais `000`.
+  retirées (ex. `746.9/7/0996` → `746.970996`). Depuis v0.3.8, les espaces
+  de regroupement dans la partie décimale sont retirés (`598.909 4` →
+  `598.9094`). Deux indices entiers séparés par un espace ne sont pas fusionnés.
+  Les annotations finales `(oeuvre)`, `(œuvre)` et `(critique)` sont séparées
+  dans `dewey_annotation`. Les préfixes, suffixes et autres annotations ambigus
+  restent non normalisés, avec niveaux nuls. Une absence de Dewey ne devient
+  jamais `000`. `dewey_source=sudoc:676$a`, `dewey_normalization_rules` et
+  `dewey_normalization_status` documentent la provenance et les transformations ;
+  `dewey_raw` conserve toujours la valeur source.
 
 ### Liens BnF en 033$a et repli sur 035$a
 

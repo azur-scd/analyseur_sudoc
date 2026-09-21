@@ -1,12 +1,34 @@
 # Audit local des extractions
 
+## Nouveautés v0.2.0
+
+L'audit exploite les listes `leader_types`, `content_types`, `media_types` et
+`nature_of_content` de l'extraction v0.3.7. Pour les anciennes extractions,
+il relit les mêmes informations dans les champs bruts disponibles.
+
+Les distributions comprennent les positions 6 et 7 du label, séparées et
+combinées ; les codes $a, $b, $c des zones 181 et 182 ; et la position 4 de
+105$a. Les valeurs 181/182 sont présentées sous forme `[vocabulaire $2, code]`
+pour ne pas mélanger les systèmes de codage. Les codes restent bruts.
+Chaque couple est compté une fois par notice dans les distributions
+`by_vocabulary`, et à chaque répétition dans celles suffixées `occurrences`.
+Les histogrammes donnent aussi le nombre de zones 181/182 par notice.
+
+La couverture distingue présence de zone et présence de code non vide.
+Les codes absents ou non renseignés sont signalés avec les PPN. L'analyse de
+la première position 105$a[4] reste distincte du contrôle historique des
+quatre positions 4–7 : ce dernier est conservé pour repérer aussi les travaux
+universitaires dont le code figure après la première position.
+
+Dernier lot analysé : `unimarc-v0.3.7`, résultats dans `audit-v0.2.0`.
+
 Le script `scripts/04_audit_unimarc.py` analyse `documents.jsonl` d'une extraction
 terminée. Il vérifie le nombre de notices et l'unicité des PPN, conserve les
 empreintes du fichier et du rapport d'extraction, et refuse une sortie non vide.
 Il ne modifie aucune notice et n'effectue aucune requête réseau.
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/04_audit_unimarc.py --input-dir data/processed/sudoc/sample-2000/unimarc-v0.3.6 --year 2025 --output-dir data/processed/sudoc/sample-2000/audit-v0.1.0
+.\.venv\Scripts\python.exe scripts/04_audit_unimarc.py --input-dir data/processed/sudoc/sample-2000/unimarc-v0.3.7 --year 2025 --output-dir data/processed/sudoc/sample-2000/audit-v0.2.0
 ```
 
 ## Livrables

@@ -1,5 +1,7 @@
 # Sudoc Explorer
 
+**Version en cours : 0.4.0 (jalon V0.4).**
+
 Les classifications IdRef des autorités liées aux seules `606$a` sont traitées
 séparément : [sélection, structure JSON et accès DuckDB](docs/idref-subject-classifications.md).
 

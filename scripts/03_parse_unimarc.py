@@ -5,7 +5,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sudoc_explorer.unimarc import extract_campaign
+from analyseur_sudoc.unimarc import extract_campaign
 
 ROOT = Path(__file__).resolve().parents[1]
 

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import duckdb
 
-from sudoc_explorer.database import save_libraries
-from sudoc_explorer.libraries import parse_listrcr
+from analyseur_sudoc.database import save_libraries
+from analyseur_sudoc.libraries import parse_listrcr
 from test_libraries import STAMP, TSV
 
 

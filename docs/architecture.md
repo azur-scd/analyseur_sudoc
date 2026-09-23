@@ -41,7 +41,7 @@ IdRef / listrcr ──► référentiel RCR + types de bibliothèques
 ## 1.2. Modules présents
 
 ```text
-src/sudoc_explorer/
+src/analyseur_sudoc/
 ├── authority_database.py
 ├── authority_enrichment.py
 ├── database.py
@@ -101,7 +101,7 @@ scripts/
 │   ├── 08_enrich_606a_authorities.py
 │   └── 09_load_authority_enrichment.py
 ├── src/
-│   └── sudoc_explorer/
+│   └── analyseur_sudoc/
 │       ├── __init__.py
 │       ├── authority_database.py
 │       ├── authority_enrichment.py
@@ -161,8 +161,8 @@ versions de la documentation, mais **ne sont pas présents** dans le dépôt act
 
 - `app/app.py` ;
 - `config/groups.yml` ;
-- `src/sudoc_explorer/similarity.py` ;
-- `src/sudoc_explorer/clustering.py`.
+- `src/analyseur_sudoc/similarity.py` ;
+- `src/analyseur_sudoc/clustering.py`.
 
 Ils doivent être considérés comme des composants prévus, non encore livrés.
 

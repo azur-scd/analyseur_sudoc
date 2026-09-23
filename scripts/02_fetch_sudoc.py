@@ -7,7 +7,7 @@ from pathlib import Path
 
 import httpx
 
-from sudoc_explorer.sudoc import collect_sudoc
+from analyseur_sudoc.sudoc import collect_sudoc
 
 ROOT = Path(__file__).resolve().parents[1]
 

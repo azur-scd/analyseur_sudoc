@@ -11,7 +11,7 @@ from pathlib import Path
 
 from lxml import etree
 
-from sudoc_explorer.sudoc import NS, now, parse_page, write_json
+from analyseur_sudoc.sudoc import NS, now, parse_page, write_json
 
 PARSER_VERSION = "0.3.8"
 AUTHOR_TAGS = {"700", "701", "702", "710", "711", "712"}

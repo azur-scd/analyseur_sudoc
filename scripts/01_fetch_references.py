@@ -9,8 +9,8 @@ from pathlib import Path
 import duckdb
 import httpx
 
-from sudoc_explorer.database import save_libraries
-from sudoc_explorer.libraries import collect_references
+from analyseur_sudoc.database import save_libraries
+from analyseur_sudoc.libraries import collect_references
 
 ROOT = Path(__file__).resolve().parents[1]
 

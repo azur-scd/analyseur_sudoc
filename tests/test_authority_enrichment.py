@@ -6,12 +6,12 @@ from pathlib import Path
 import httpx
 import duckdb
 
-from sudoc_explorer.authority_enrichment import collect_authorities, enrich_documents, heading_links, parse_authority
-from sudoc_explorer.authority_database import load_authority_enrichment
-from sudoc_explorer.database import FIELDS
-from sudoc_explorer.enrichment import digest, read_jsonl, write_jsonl
-from sudoc_explorer.unimarc import dewey
-from sudoc_explorer.warehouse import load_corpus
+from analyseur_sudoc.authority_enrichment import collect_authorities, enrich_documents, heading_links, parse_authority
+from analyseur_sudoc.authority_database import load_authority_enrichment
+from analyseur_sudoc.database import FIELDS
+from analyseur_sudoc.enrichment import digest, read_jsonl, write_jsonl
+from analyseur_sudoc.unimarc import dewey
+from analyseur_sudoc.warehouse import load_corpus
 
 
 def subject(tag, subs, index=1):

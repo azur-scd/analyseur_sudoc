@@ -5,8 +5,8 @@ from pathlib import Path
 
 import duckdb
 
-from sudoc_explorer.enrichment import digest, read_jsonl
-from sudoc_explorer.sudoc import now
+from analyseur_sudoc.enrichment import digest, read_jsonl
+from analyseur_sudoc.sudoc import now
 
 
 def insert_batch(con, table, rows):

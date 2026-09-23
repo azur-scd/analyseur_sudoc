@@ -1,195 +1,181 @@
 # Sudoc Explorer
-## Architecture technique — V1
+## Architecture technique
 
-# 1. Pipeline général
+Ce document distingue l'architecture effectivement implémentée dans le dépôt et
+la cible V1 décrite dans le [PRD](PRD.md). Les éléments absents de l'arborescence
+actuelle sont explicitement signalés comme prévus et non comme présents.
+
+# 1. Architecture actuellement implémentée
+
+## 1.1. Pipeline livré
 
 ```text
-                   ┌──────────────────┐
-                   │ IdRef / listrcr  │
-                   └────────┬─────────┘
-                            ▼
-                      TSV national
-                            │
-                   ┌────────┴────────┐
-                   │                 │
-                   ▼                 ▼
-              données RCR       PPN des RCR
-                                     │
-                                     ▼
-                              IdRef/{PPN}.json
-                                     │
-                                     ▼
-                                   130$a
-                                     │
-                                     ▼
-                                  LIBRARY
-
-
-                  ┌─────────────────┐
-                  │    Sudoc SRU    │
-                  └────────┬────────┘
-                           ▼
-                    XML UNIMARC brut
-                           │
-                           ▼
-                    parser UNIMARC
-                           │
-        ┌──────────────────┼──────────────────┐
-        ▼                  ▼                  ▼
-    DOCUMENT          CLASSIFICATION        HOLDING
-    AUTHOR                                   │
-    PUBLISHER                                │
-        │                                    │
-        └────────────────┬───────────────────┘
-                         ▼
-                       DuckDB
+IdRef / listrcr ──► référentiel RCR + types de bibliothèques
                          │
                          ▼
-                  contrôles qualité
+                    Sudoc SRU
                          │
                          ▼
-                 profils par RCR
+                  XML UNIMARC brut
                          │
                          ▼
-                    RCR ≥ 1 000
+                   parsing UNIMARC
+                         │
+         ┌───────────────┼────────────────┬────────────────┐
+         ▼               ▼                ▼                ▼
+    documents       holdings        classifications    locations
+         │               │                │                │
+         └───────────────┴────────────────┴────────────────┘
                          │
                          ▼
-                     clustering
+                    audit qualité
                          │
                          ▼
-                analyses documentaires
+            normalisation Dewey et enrichissements
+                  (BnF, types RCR, autorités 606$a)
                          │
                          ▼
-                      Streamlit
+                        DuckDB
 ```
 
-# 2. Choix techniques
-
-## Python
-
-Langage principal du projet.
-
-## HTTP
-
-`httpx`
-
-## XML
-
-`lxml`
-
-L'utilisation d'une bibliothèque MARC complémentaire pourra être étudiée, mais la logique métier du parsing reste contrôlée dans le projet.
-
-## Base analytique
-
-DuckDB.
-
-## Manipulation de données
-
-- Polars ;
-- SQL DuckDB.
-
-## Machine learning
-
-scikit-learn.
-
-## Interface
-
-Streamlit.
-
-## Environnement
-
-`.venv`
-
-Dépendances dans `pyproject.toml`.
-
-# 3. Organisation du dépôt
+## 1.2. Modules présents
 
 ```text
-sudoc-explorer/
-│
+src/sudoc_explorer/
+├── authority_database.py
+├── authority_enrichment.py
+├── database.py
+├── enrichment.py
+├── libraries.py
+├── quality.py
+├── sudoc.py
+├── unimarc.py
+└── warehouse.py
+```
+
+## 1.3. Scripts présents
+
+```text
+scripts/
+├── 01_fetch_references.py
+├── 02_fetch_sudoc.py
+├── 03_parse_unimarc.py
+├── 04_audit_unimarc.py
+├── 05_dewey_review.py
+├── 06_enrich_bnf_idref.py
+├── 07_load_corpus.py
+├── 08_enrich_606a_authorities.py
+└── 09_load_authority_enrichment.py
+```
+
+## 1.4. Organisation du dépôt documentée à partir de l'arborescence réelle
+
+```text
+./
 ├── README.md
 ├── pyproject.toml
-├── .gitignore
-├── .env.example
-│
-├── config/
-│   └── groups.yml
-│
-├── data/
-│   ├── raw/
-│   │   └── sudoc/
-│   ├── reference/
-│   │   └── listrcr/
-│   ├── processed/
-│   └── sudoc.duckdb
-│
 ├── docs/
 │   ├── PRD.md
 │   ├── functional-spec.md
 │   ├── data-spec.md
 │   ├── architecture.md
 │   ├── validation-plan.md
-│   └── unimarc-mapping.md
-│
-├── src/
-│   └── sudoc_explorer/
-│       ├── __init__.py
-│       ├── config.py
-│       ├── sudoc.py
-│       ├── unimarc.py
-│       ├── libraries.py
-│       ├── database.py
-│       ├── quality.py
-│       ├── similarity.py
-│       └── clustering.py
-│
+│   ├── unimarc-mapping.md
+│   ├── sru-collection.md
+│   ├── quality-audit.md
+│   ├── dewey-enrichment.md
+│   ├── enrichment-and-database.md
+│   ├── idref-subject-classifications.md
+│   ├── index.md
+│   ├── decisions.md
+│   ├── output-contracts.md
+│   └── reproduction.md
 ├── scripts/
 │   ├── 01_fetch_references.py
 │   ├── 02_fetch_sudoc.py
 │   ├── 03_parse_unimarc.py
-│   ├── 04_build_database.py
-│   └── 05_analyse.py
-│
-├── app/
-│   └── app.py
-│
+│   ├── 04_audit_unimarc.py
+│   ├── 05_dewey_review.py
+│   ├── 06_enrich_bnf_idref.py
+│   ├── 07_load_corpus.py
+│   ├── 08_enrich_606a_authorities.py
+│   └── 09_load_authority_enrichment.py
+├── src/
+│   └── sudoc_explorer/
+│       ├── __init__.py
+│       ├── authority_database.py
+│       ├── authority_enrichment.py
+│       ├── database.py
+│       ├── enrichment.py
+│       ├── libraries.py
+│       ├── quality.py
+│       ├── sudoc.py
+│       ├── unimarc.py
+│       └── warehouse.py
 └── tests/
-    ├── fixtures/
-    ├── test_unimarc.py
-    ├── test_libraries.py
+    ├── test_authority_enrichment.py
     ├── test_database.py
-    ├── test_similarity.py
-    └── test_clustering.py
+    ├── test_enrichment.py
+    ├── test_libraries.py
+    ├── test_quality.py
+    ├── test_sudoc.py
+    └── test_unimarc.py
 ```
 
-# 4. Versionnement Git
+## 1.5. Artefacts locaux et données non versionnés
 
 Git versionne :
 
-- code ;
-- documentation ;
-- tests ;
-- configuration non sensible ;
-- petites fixtures de test.
+- le code ;
+- la documentation ;
+- les tests ;
+- la configuration non sensible ;
+- les petites fixtures de test.
 
 Ne sont pas versionnés :
 
-- environnement Python ;
-- corpus XML massif ;
-- DuckDB de production ;
-- fichiers intermédiaires volumineux ;
-- secrets.
+- l'environnement Python ;
+- les corpus XML massifs ;
+- les bases DuckDB de travail ;
+- les fichiers intermédiaires volumineux ;
+- les caches de campagnes et d'enrichissements ;
+- les secrets.
 
-# 5. Étapes de développement
+# 2. Architecture cible V1
 
-## V0.1 — Référentiels
+## 2.1. Chaîne fonctionnelle cible
+
+La cible V1 décrite par le PRD prolonge le pipeline livré par des traitements
+analytiques et une interface locale. Les critères de validation attendus pour
+ces étapes à venir sont détaillés dans le [plan de validation](validation-plan.md) :
+
+```text
+DuckDB ──► profils par RCR ──► similarité ──► clustering ──►
+analyses documentaires ──► interface Streamlit
+```
+
+## 2.2. Éléments prévus mais absents de l'arborescence actuelle
+
+Les éléments ci-dessous sont mentionnés dans la cible V1 ou dans d'anciennes
+versions de la documentation, mais **ne sont pas présents** dans le dépôt actuel :
+
+- `app/app.py` ;
+- `config/groups.yml` ;
+- `src/sudoc_explorer/similarity.py` ;
+- `src/sudoc_explorer/clustering.py`.
+
+Ils doivent être considérés comme des composants prévus, non encore livrés.
+
+# 3. Feuille de route V0.1 à V0.8
+
+## V0.1 — Référentiels (**livré**)
 
 - téléchargement `listrcr` ;
 - nettoyage TSV ;
 - récupération des types via IdRef ;
 - création de `LIBRARY`.
 
-## V0.2 — Collecte Sudoc
+## V0.2 — Collecte Sudoc (**livré**)
 
 Implémentée dans `sudoc.py` et `scripts/02_fetch_sudoc.py`.
 Voir [les règles de collecte SRU](sru-collection.md) pour le découpage par
@@ -201,7 +187,7 @@ préfixe PPN, la reprise et la portée du contrôle d'exhaustivité.
 - conservation XML ;
 - rapport d'exhaustivité.
 
-## V0.3 — Parsing UNIMARC
+## V0.3 — Parsing UNIMARC (**livré**)
 
 Extraction :
 
@@ -215,20 +201,27 @@ Extraction :
 - Dewey ;
 - RCR.
 
-## V0.4 — DuckDB
+## V0.3.1 à V0.3.8 — Audit et normalisation Dewey (**livrés**)
 
-- tables ;
-- chargement ;
-- jointures ;
-- contrôles qualité.
+- audit statistique des extractions ;
+- contrôles de couverture et d'anomalies ;
+- normalisation Dewey ;
+- préparation du lot candidat BnF.
 
-## V0.5 — Analyse descriptive
+## V0.4 — Enrichissements et DuckDB (**livré**)
+
+- enrichissements BnF et IdRef ;
+- chargement transactionnel dans DuckDB ;
+- chargement séparé des classifications d'autorité ;
+- contrôles d'identité des lots, des empreintes et des relations PPN/RCR.
+
+## V0.5 — Analyse descriptive (**à venir**)
 
 - profils RCR ;
 - distributions Dewey ;
-- statistiques.
+- statistiques descriptives pour l'exploration analytique.
 
-## V0.6 — Similarité et clustering
+## V0.6 — Similarité et clustering (**à venir**)
 
 - population RCR ≥ 1 000 ;
 - Jaccard ;
@@ -236,16 +229,26 @@ Extraction :
 - clustering ;
 - caractérisation.
 
-## V0.7 — Politique documentaire
+## V0.7 — Politique documentaire (**à venir**)
 
 - documents absents ;
 - diffusion réseau ;
 - diffusion chez les pairs.
 
-## V0.8 — Interface
+## V0.8 — Interface (**à venir**)
 
 - Streamlit ;
 - filtres ;
 - tableaux ;
 - graphiques ;
 - navigation.
+
+# 4. Convention documentaire sur les versions
+
+Plusieurs niveaux de version coexistent dans le projet :
+
+- **version du paquet Python** : portée par `pyproject.toml` ;
+- **version du parser / format d'extraction** : par exemple `unimarc-v0.3.8` ;
+- **version des audits, lots et enrichissements** : par exemple `audit-v0.3.1`,
+  `bnf-idref-v0.1.0` ou `idref-606a-v0.1.0` ;
+- **cible produit V1** : niveau fonctionnel visé par le PRD et les spécifications.

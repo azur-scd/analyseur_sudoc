@@ -191,11 +191,11 @@ WHERE run_id = 'idref-606a-v1'
 ```sql
 -- Comparer sans mélanger les méthodes : sudoc:676$a, bnf:676$a,
 -- idref:dewey, idref:rameau_domain.
-SELECT DISTINCT ppn, source AS methode, dewey_normalized AS code
+SELECT DISTINCT ppn, source AS "méthode", dewey_normalized AS code
 FROM CLASSIFICATION
 WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1' AND dewey_normalized IS NOT NULL
 UNION ALL
-SELECT DISTINCT ppn, 'idref:' || scheme AS methode, code
+SELECT DISTINCT ppn, 'idref:' || scheme AS "méthode", code
 FROM AUTHORITY_CLASSIFICATION
 WHERE run_id = 'idref-606a-v1'
   AND corpus_id = 'sample-2000-2025-bnf-idref-v1'

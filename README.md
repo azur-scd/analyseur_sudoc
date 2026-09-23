@@ -82,7 +82,7 @@ et constitution du corpus est actuellement implémentée dans le dépôt.
 
 ## Statut du dépôt
 
-- **V0.1 — Référentiels : livré** (`scripts/01_fetch_references.py`, table `LIBRARY`).
+- **V0.1 — Référentiels : livrés** (`scripts/01_fetch_references.py`, table `LIBRARY`).
 - **V0.2 — Collecte Sudoc SRU : livrée** (`scripts/02_fetch_sudoc.py`, campagnes,
   `manifest.json`, `report.json`, reprise des pages XML).
 - **V0.3 — Parsing UNIMARC : livré** (`scripts/03_parse_unimarc.py`, extractions

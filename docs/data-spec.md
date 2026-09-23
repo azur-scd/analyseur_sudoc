@@ -1,4 +1,4 @@
-# Sudoc Explorer
+# Analyseur Sudoc
 ## Spécification des données — V1
 
 Mise à jour du lot expérimental : l'utilisateur a validé la conservation des

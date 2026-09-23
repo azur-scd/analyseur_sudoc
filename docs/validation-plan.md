@@ -1,4 +1,4 @@
-# Sudoc Explorer
+# Analyseur Sudoc
 ## Plan de validation et de tests — V1
 
 Ce plan distingue :

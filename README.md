@@ -1,6 +1,6 @@
-# Sudoc Explorer
+# Analyseur Sudoc
 
-**Sudoc Explorer** est une application locale d'exploration et d'analyse des
+**Analyseur Sudoc** est une application locale d'exploration et d'analyse des
 collections documentaires signalées dans le Sudoc.
 
 Elle permet de constituer un corpus de documents correspondant à une année de

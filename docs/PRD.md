@@ -1,4 +1,4 @@
-# Sudoc Explorer
+# Analyseur Sudoc
 ## PRD — Document des Exigences Produit
 
 **Version :** 1.0  
@@ -19,7 +19,7 @@
 
 # 1. Vision
 
-Sudoc Explorer est une application locale permettant d'explorer les données bibliographiques et de localisation du Sudoc afin de mieux comprendre les profils documentaires des bibliothèques du réseau et d'aider à l'analyse des collections et de la politique documentaire.
+Analyseur Sudoc est une application locale permettant d'explorer les données bibliographiques et de localisation du Sudoc afin de mieux comprendre les profils documentaires des bibliothèques du réseau et d'aider à l'analyse des collections et de la politique documentaire.
 
 Le projet comporte deux axes complémentaires.
 
@@ -50,7 +50,7 @@ Un groupe configurable de RCR pourra éventuellement être utilisé dans cet axe
 
 La pertinence de cette agrégation devra être évaluée expérimentalement.
 
-Sudoc Explorer n'a pas vocation à décider automatiquement des acquisitions.
+Analyseur Sudoc n'a pas vocation à décider automatiquement des acquisitions.
 
 Il constitue un **outil d'exploration et d'aide à la décision professionnelle**.
 
@@ -428,7 +428,7 @@ La V1 est considérée comme réussie si elle permet :
 
 # 11. Principe directeur
 
-Sudoc Explorer suit la chaîne :
+Analyseur Sudoc suit la chaîne :
 
 **données sources conservées → transformations documentées → contrôles qualité → profils documentaires par RCR → analyses statistiques explicables → interprétation professionnelle.**
 

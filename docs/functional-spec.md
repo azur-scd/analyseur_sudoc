@@ -1,4 +1,4 @@
-# Sudoc Explorer
+# Analyseur Sudoc
 ## Spécification fonctionnelle — V1
 
 # 1. Tableau de bord du corpus

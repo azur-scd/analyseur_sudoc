@@ -77,6 +77,9 @@ Ces commandes créent ou réutilisent des campagnes locales dans
 
 Cette étape travaille sur les XML déjà téléchargés et crée un nouveau dossier
 local sous `data/processed/sudoc/sample-2000/`.
+Dans ce parcours, `sample-2000` désigne le nom local du lot collecté ; les
+identifiants `sample-2000-2025-bnf-idref-v1` et `idref-606a-v1` utilisés plus
+loin correspondent au chargement DuckDB de ce même lot après enrichissement.
 
 ## 5. Audit
 
@@ -103,6 +106,10 @@ Ces étapes sont locales et n'effectuent pas de requêtes réseau.
 ## 6. Enrichissement
 
 ### Enrichissement BnF / IdRef du lot bibliographique
+
+Dans cet exemple, `data/reference/listrcr/smoke-test` désigne un répertoire de
+référence déjà collecté et réutilisé comme cache antérieur, conformément à la
+commande documentée dans `enrichment-and-database.md`.
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/06_enrich_bnf_idref.py --input-dir data/processed/sudoc/sample-2000/unimarc-v0.3.8 --run-dir data/enrichment/sample-2000/bnf-idref-v0.1.0 --prior-reference data/reference/listrcr/smoke-test

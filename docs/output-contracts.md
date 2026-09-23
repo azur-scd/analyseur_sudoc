@@ -51,7 +51,7 @@ Autres sorties documentées de la même famille :
 | `libraries.jsonl` | Métadonnées des RCR enrichies pour le lot. | `rcr` | Conserve la provenance `listrcr` et IdRef, ainsi que les empreintes citées dans la documentation. | Réutilisé au chargement DuckDB et à la reprise. |
 | `authority-results.jsonl` | Résultat par autorité liée aux `606$a`. | PPN d'autorité résolu | Statut de collecte et preuves par autorité. | Séparé des notices bibliographiques. |
 | `authority-classifications.jsonl` | Occurrences de classifications d'autorité reliées aux documents. | Couple logique `ppn` bibliographique / PPN d'autorité | Distingue `scheme`, `code_raw`, `code`, les sous-zones intégrales et le chemin `via_606a`. | Conserve les répétitions et les méthodes séparées. |
-| rapport JSON d'enrichissement | Rapport de collecte et de traitement du lot d'autorités. | Dossier d'enrichissement | Statuts des liens `606$a`, comptes d'autorités distinctes et résultats de collecte documentés. | Sert aux contrôles et à la reprise. |
+| rapport JSON d'enrichissement (nom non figé dans la documentation source) | Rapport de collecte et de traitement du lot d'autorités. | Dossier d'enrichissement | Statuts des liens `606$a`, comptes d'autorités distinctes et résultats de collecte documentés. | Sert aux contrôles et à la reprise. |
 
 ## 5. Chargement DuckDB
 

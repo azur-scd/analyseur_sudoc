@@ -1,15 +1,21 @@
 # Normalisation Dewey et préparation de l'enrichissement BnF
 
-La version 0.3.8 du parseur retire les espaces de regroupement décimaux et
+La version interne 0.3.8 du parseur UNIMARC — définie dans
+`src/analyseur_sudoc/unimarc.py` et exécutée par
+`scripts/03_parse_unimarc.py` — retire les espaces de regroupement décimaux et
 sépare les annotations littéraires reconnues. Voir `unimarc-mapping.md`.
-Elle ne devine pas la signification des préfixes/suffixes (B, C, NZ, v23,
-etc.) et ne complète pas les indices par des chiffres supposés.
+Cette version ne devine pas la signification des préfixes/suffixes (B, C, NZ,
+v23, etc.) et ne complète pas les indices par des chiffres supposés.
+
+> Note : il ne s'agit pas de la version du paquet Python déclarée dans
+> `pyproject.toml` (actuellement 0.4.0). La référence `0.3.8` ici désigne la
+> version du moteur d'extraction UNIMARC, pas le numéro de version du projet.
 
 Le script suivant compare deux extractions contenant exactement les mêmes
 PPN et prépare les listes d'examen, sans accès réseau :
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/05_dewey_review.py --before data/processed/sudoc/sample-2000/unimarc-v0.3.7 --after data/processed/sudoc/sample-2000/unimarc-v0.3.8 --output-dir data/processed/sudoc/sample-2000/dewey-review-v0.3.8
+.\.venv\Scripts\python.exe scripts/05_dewey_review.py --before data/processed/sudoc/sample-2000/unimarc-v0.3.7 --after data/processed/sudoc/sample-2000/unimarc-v0.3.8 --output-dir data/processed/sudoc[...]
 ```
 
 La sortie doit être vide. Elle contient un rapport, les statistiques avec

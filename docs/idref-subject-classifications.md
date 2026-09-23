@@ -1,4 +1,4 @@
-# Classifications IdRef via les seules têtes 606$a
+# Classifications IdRef via les seules têtes de vedettes 606$a
 
 ## Sélection
 
@@ -44,7 +44,7 @@ Références Abes consultées le 21 septembre 2026 :
 
 `documents.jsonl` conserve toutes les données d'entrée et ajoute deux listes :
 
-- `idref_606a_links` : chaque tête 606$a, son libellé brut, ses indices
+- `idref_606a_links` : chaque tête de vedette 606$a, son libellé brut, ses indices
   de zone/sous-zone, le PPN d'autorité demandé et résolu, le statut et la provenance.
 - `idref_606a_classifications` : une entrée par classe et par chemin depuis
   une 606$a, avec `scheme`, `code_raw`, `code`, la zone IdRef source,

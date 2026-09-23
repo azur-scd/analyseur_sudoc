@@ -109,10 +109,17 @@ même chose :
 
 ## Installation (PowerShell, Python 3.11 ou supérieur)
 
+
+Si l’environnement virtuel `.venv` n’existe pas encore, créez-le :
+
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e .
 ```
+
+Puis installez le projet et ses dépendances en mode éditable :
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e .
 
 ## Collecter les bibliothèques
 

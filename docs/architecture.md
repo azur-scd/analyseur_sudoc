@@ -146,7 +146,8 @@ Ne sont pas versionnés :
 ## 2.1. Chaîne fonctionnelle cible
 
 La cible V1 décrite par le PRD prolonge le pipeline livré par des traitements
-analytiques et une interface locale :
+analytiques et une interface locale. Les critères de validation attendus pour
+ces étapes à venir sont détaillés dans le [plan de validation](validation-plan.md) :
 
 ```text
 DuckDB ──► profils par RCR ──► similarité ──► clustering ──►

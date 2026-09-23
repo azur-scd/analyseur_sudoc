@@ -1,6 +1,52 @@
 # Analyseur Sudoc
 ## Spécification fonctionnelle — V1
 
+**Version :** 1.0  
+**Statut :** spécification fonctionnelle cible V1 et état d'implémentation partiel  
+**Nature :** écrans, filtres, règles métier et indicateurs attendus pour la V1
+
+> **Positionnement du document**
+>
+> Ce document décrit les exigences fonctionnelles **cibles** de la V1.
+>
+> Il ne constitue pas une description exhaustive de l'état actuel de
+> l'implémentation.
+>
+> Les écrans, filtres, règles métier et indicateurs décrits ci-dessous expriment
+> le besoin fonctionnel V1, sans garantie qu'ils soient déjà tous réalisés.
+>
+> L'avancement réel doit être suivi séparément dans la documentation
+> d'architecture et de livraison.
+
+---
+
+# 0. Cadrage cible / état / à faire
+
+## 0.1. Statuts utilisés
+
+| Statut | Signification |
+|---|---|
+| Cible fonctionnelle V1 | Exigence attendue pour la V1. |
+| Réalisé / vérifié | Élément livré et corroboré par le dépôt ou la documentation d'implémentation. |
+| Partiellement réalisé / à valider | Élément amorcé ou disponible en partie, restant à confirmer ou stabiliser. |
+| Reste à faire | Élément ciblé pour la V1 mais non livré à ce stade. |
+| Hors périmètre V1 / expérimental | Élément explicitement exclu du socle V1 ou conservé à titre d'expérimentation. |
+
+## 0.2. État d'implémentation (synthèse)
+
+| Domaine fonctionnel décrit ici | Cible fonctionnelle V1 | Statut d'implémentation |
+|---|---|---|
+| Tableau de bord, exploration du corpus et filtres analytiques | Oui | Partiellement réalisé / à valider |
+| Écran Bibliothèques et profil Dewey par RCR | Oui | Partiellement réalisé / à valider |
+| Écran Comparaison (Jaccard, similarité cosinus, écarts disciplinaires) | Oui | Reste à faire |
+| Écran Clustering (RCR ≥ 1 000, caractérisation des clusters) | Oui | Reste à faire |
+| Écran Politique documentaire (documents absents, diffusion réseau/pairs) | Oui | Reste à faire |
+| Score d'intérêt composite | Non (V1 privilégie des indicateurs séparés) | Hors périmètre V1 / expérimental |
+| Règles fonctionnelles de cohérence des analyses | Oui | Partiellement réalisé / à valider |
+
+Références utiles pour l'état actuel : [PRD](PRD.md),
+[architecture](architecture.md), [data-spec](data-spec.md).
+
 # 1. Tableau de bord du corpus
 
 Afficher au minimum :

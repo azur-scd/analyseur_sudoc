@@ -1,4 +1,4 @@
-# Sudoc Explorer
+# Analyseur Sudoc
 ## Mapping UNIMARC — V1
 
 Ce document centralise les choix de mapping UNIMARC utilisés par le projet.

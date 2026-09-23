@@ -1,4 +1,4 @@
-# Sudoc Explorer
+# Analyseur Sudoc
 ## Architecture technique
 
 Ce document distingue l'architecture effectivement implémentée dans le dépôt et

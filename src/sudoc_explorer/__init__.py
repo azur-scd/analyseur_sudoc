@@ -1,1 +1,1 @@
-"""Sudoc Explorer."""
+"""Analyseur Sudoc"""

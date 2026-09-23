@@ -5,7 +5,7 @@ from pathlib import Path
 
 import httpx
 
-from sudoc_explorer.libraries import collect_references, extract_library_type, parse_listrcr
+from analyseur_sudoc.libraries import collect_references, extract_library_type, parse_listrcr
 
 TSV = ('RCR\tLIBELLE\tILN\tPPN\tVILLE\tCDPOSTAL\tPAYS\tLATITUDE\tLONGITUDE\n'
        '=\"040702201\"\tBibliothèque\t4\t=\"068875975\"\tDigne\t04000\tFR\t44.09\t6.22\n'

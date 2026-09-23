@@ -4,7 +4,7 @@ import hashlib
 import tempfile
 from pathlib import Path
 
-from sudoc_explorer.quality import audit_documents, audit_extraction, classification_analysis
+from analyseur_sudoc.quality import audit_documents, audit_extraction, classification_analysis
 
 
 def document():

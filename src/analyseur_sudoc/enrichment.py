@@ -10,10 +10,10 @@ from urllib.parse import urlsplit
 import httpx
 from lxml import etree
 
-from sudoc_explorer.database import FIELDS
-from sudoc_explorer.libraries import LISTRCR_URL, extract_library_type, fetch, parse_listrcr
-from sudoc_explorer.sudoc import now, write_json
-from sudoc_explorer.unimarc import children, clean, dewey
+from analyseur_sudoc.database import FIELDS
+from analyseur_sudoc.libraries import LISTRCR_URL, extract_library_type, fetch, parse_listrcr
+from analyseur_sudoc.sudoc import now, write_json
+from analyseur_sudoc.unimarc import children, clean, dewey
 
 
 def digest(raw):

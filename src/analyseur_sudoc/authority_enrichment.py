@@ -8,9 +8,9 @@ from pathlib import Path
 import httpx
 from lxml import etree
 
-from sudoc_explorer.enrichment import cached_fetch, digest, read_jsonl, write_jsonl
-from sudoc_explorer.sudoc import now, write_json
-from sudoc_explorer.unimarc import children, clean, dewey
+from analyseur_sudoc.enrichment import cached_fetch, digest, read_jsonl, write_jsonl
+from analyseur_sudoc.sudoc import now, write_json
+from analyseur_sudoc.unimarc import children, clean, dewey
 
 VERSION = "0.1.0"
 PPN = re.compile(r"[0-9]{8}[0-9X]")

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from lxml import etree
 
-from sudoc_explorer.unimarc import bnf_ark_url, coded_date, dewey, extract_campaign, parse_record
+from analyseur_sudoc.unimarc import bnf_ark_url, coded_date, dewey, extract_campaign, parse_record
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

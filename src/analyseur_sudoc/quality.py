@@ -9,7 +9,7 @@ from itertools import combinations
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from sudoc_explorer.sudoc import now, write_json
+from analyseur_sudoc.sudoc import now, write_json
 
 AUDIT_VERSION = "0.3.1"
 

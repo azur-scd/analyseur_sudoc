@@ -6,7 +6,7 @@ from pathlib import Path
 
 import httpx
 
-from sudoc_explorer.authority_enrichment import collect_authorities, enrich_documents
+from analyseur_sudoc.authority_enrichment import collect_authorities, enrich_documents
 
 
 if __name__ == "__main__":

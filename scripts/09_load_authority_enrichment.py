@@ -4,8 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
-from sudoc_explorer.authority_database import load_authority_enrichment
-from sudoc_explorer.sudoc import write_json
+from analyseur_sudoc.authority_database import load_authority_enrichment
+from analyseur_sudoc.sudoc import write_json
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ import argparse
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sudoc_explorer.quality import audit_extraction
+from analyseur_sudoc.quality import audit_extraction
 
 
 def main():

@@ -4,8 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
-from sudoc_explorer.warehouse import load_corpus
-from sudoc_explorer.sudoc import write_json
+from analyseur_sudoc.warehouse import load_corpus
+from analyseur_sudoc.sudoc import write_json
 
 
 if __name__ == "__main__":

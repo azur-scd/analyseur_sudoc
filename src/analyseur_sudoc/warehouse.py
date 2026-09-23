@@ -5,9 +5,9 @@ from pathlib import Path
 
 import duckdb
 
-from sudoc_explorer.database import FIELDS
-from sudoc_explorer.enrichment import digest, read_jsonl
-from sudoc_explorer.sudoc import now
+from analyseur_sudoc.database import FIELDS
+from analyseur_sudoc.enrichment import digest, read_jsonl
+from analyseur_sudoc.sudoc import now
 
 FIELD_LISTS = {"authors": "AUTHOR", "publishers": "PUBLISHER", "subjects": "SUBJECT",
                "summaries": "SUMMARY", "languages": "LANGUAGE", "countries": "COUNTRY",

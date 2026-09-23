@@ -7,10 +7,10 @@ import duckdb
 import httpx
 from lxml import etree
 
-from sudoc_explorer.database import FIELDS
-from sudoc_explorer.enrichment import ark_from_url, cached_fetch, digest, parse_bnf, write_jsonl
-from sudoc_explorer.unimarc import parse_record
-from sudoc_explorer.warehouse import load_corpus
+from analyseur_sudoc.database import FIELDS
+from analyseur_sudoc.enrichment import ark_from_url, cached_fetch, digest, parse_bnf, write_jsonl
+from analyseur_sudoc.unimarc import parse_record
+from analyseur_sudoc.warehouse import load_corpus
 
 
 class BnfTests(unittest.TestCase):

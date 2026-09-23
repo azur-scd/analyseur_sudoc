@@ -8,7 +8,7 @@ from urllib.parse import quote_plus
 
 import httpx
 
-from sudoc_explorer.sudoc import DIAG, SRU, SruError, build_query, collect_sudoc, parse_page
+from analyseur_sudoc.sudoc import DIAG, SRU, SruError, build_query, collect_sudoc, parse_page
 
 
 def response_xml(ppns=(), *, total=None, start=1, query=None, namespace=""):

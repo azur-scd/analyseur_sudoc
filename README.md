@@ -14,16 +14,61 @@ produits et limites dans [la documentation de l'audit](docs/quality-audit.md).
 
 Application locale d'exploration et d'analyse des collections signalées dans le Sudoc.
 
+## Architecture actuelle et cible V1
+
+### Architecture actuellement implémentée
+
+Le dépôt implémente aujourd'hui un pipeline documentaire et technique couvrant :
+
+- le référentiel RCR via `listrcr` et l'enrichissement IdRef des bibliothèques ;
+- la collecte Sudoc SRU par campagnes rejouables ;
+- l'extraction UNIMARC des notices, localisations, résumés, indexations et liens BnF ;
+- l'audit qualité local des lots extraits et enrichis ;
+- la normalisation Dewey et la préparation de l'enrichissement BnF ;
+- les enrichissements BnF/IdRef ;
+- le chargement analytique local dans DuckDB.
+
+### Cible V1 encore à venir
+
+Le [PRD](docs/PRD.md) et les spécifications décrivent une cible V1 plus large.
+Les profils RCR, la similarité, le clustering, l'analyse documentaire et
+l'interface Streamlit restent des objectifs à venir ; ils ne sont pas décrits
+ici comme déjà implémentés.
+
 ## Documentation
+
+- [Index de la documentation](docs/index.md)
+
+### Vision et spécifications
 
 - [PRD](docs/PRD.md)
 - [Spécification fonctionnelle](docs/functional-spec.md)
 - [Spécification des données](docs/data-spec.md)
-- [Architecture technique](docs/architecture.md)
-- [Plan de validation et de tests](docs/validation-plan.md)
+
+### Pipeline implémenté
+
+- [Collecte Sudoc SRU](docs/sru-collection.md)
 - [Mapping UNIMARC](docs/unimarc-mapping.md)
+- [Audit local des extractions](docs/quality-audit.md)
+- [Normalisation Dewey et préparation de l'enrichissement BnF](docs/dewey-enrichment.md)
+- [Enrichissement BnF / IdRef et chargement DuckDB](docs/enrichment-and-database.md)
+- [Classifications IdRef via les seules têtes 606$a](docs/idref-subject-classifications.md)
+- [Contrats documentaires des sorties](docs/output-contracts.md)
+- [Parcours de reproduction](docs/reproduction.md)
+
+### Qualité, validation et tests
+
+- [Plan de validation et de tests](docs/validation-plan.md)
+- [Synthèse des décisions documentées](docs/decisions.md)
+
+### Architecture et évolution
+
+- [Architecture technique](docs/architecture.md)
 
 ## Principes V1
+
+Les principes ci-dessous décrivent la cible produit V1. Seule la partie pipeline
+et constitution du corpus est actuellement implémentée dans le dépôt.
 
 - une année de publication à la fois ;
 - première année : 2025 ;
@@ -35,10 +80,30 @@ Application locale d'exploration et d'analyse des collections signalées dans le
 - stockage analytique local dans DuckDB ;
 - prototype en Python et Streamlit.
 
-## Statut
+## Statut du dépôt
 
-V0.1 : collecte du référentiel RCR, enrichissement IdRef et table `LIBRARY` disponibles.
-V0.2 : collecte annuelle Sudoc SRU, reprise des pages XML et rapport d'exhaustivité disponibles.
+- **V0.1 — Référentiels : livré** (`scripts/01_fetch_references.py`, table `LIBRARY`).
+- **V0.2 — Collecte Sudoc SRU : livrée** (`scripts/02_fetch_sudoc.py`, campagnes,
+  `manifest.json`, `report.json`, reprise des pages XML).
+- **V0.3 — Parsing UNIMARC : livré** (`scripts/03_parse_unimarc.py`, extractions
+  `documents.jsonl`, `holdings.jsonl`, `classifications.jsonl`, `subjects.jsonl`,
+  `summaries.jsonl`, `bnf_links.jsonl`, `locations.jsonl`).
+- **V0.3.1 à V0.3.8 — Audit et normalisation Dewey : livrés**
+  (`scripts/04_audit_unimarc.py`, `scripts/05_dewey_review.py`).
+- **V0.4 — Enrichissements et chargement DuckDB : livré**
+  (`scripts/06_enrich_bnf_idref.py` à `scripts/09_load_authority_enrichment.py`).
+- **V0.5 à V0.8 — Profils RCR, similarité, clustering, analyses et interface : à venir**.
+
+## Convention documentaire sur les versions
+
+Plusieurs niveaux de version coexistent dans le dépôt ; ils ne décrivent pas la
+même chose :
+
+- **version du paquet Python** : version publiée dans `pyproject.toml` ;
+- **version du parser / format d'extraction** : versions telles que `unimarc-v0.3.8` ;
+- **version des lots, audits et enrichissements** : versions de dossiers et de
+  campagnes comme `audit-v0.3.1`, `bnf-idref-v0.1.0` ou `idref-606a-v0.1.0` ;
+- **cible produit V1** : niveau fonctionnel décrit par le PRD et les spécifications.
 
 ## Installation (PowerShell, Python 3.11 ou supérieur)
 

@@ -1,20 +1,23 @@
 # Sudoc Explorer
 
-**Version en cours : 0.4.0 (jalon V0.4).**
+**Sudoc Explorer** est une application locale d'exploration et d'analyse des
+collections documentaires signalées dans le Sudoc.
 
-Les classifications IdRef des autorités liées aux seules `606$a` sont traitées
-séparément : [sélection, structure JSON et accès DuckDB](docs/idref-subject-classifications.md).
+Elle permet de constituer un corpus de documents correspondant à une année de
+publication, de le relier aux bibliothèques qui les conservent et d'en analyser
+les principales caractéristiques : disciplines, langues, pays, dates,
+indexations, résumés et types de documents.
 
-Le lot enrichi BnF et IdRef est chargé dans `data/sudoc.duckdb`.
-Voir [l'enrichissement et le schéma DuckDB](docs/enrichment-and-database.md)
-pour les commandes de reprise, la provenance des données et les requêtes SQL.
+L'application a pour objectif d'aider à mieux comprendre la répartition et la
+complémentarité des collections entre bibliothèques, à partir des données du
+Sudoc enrichies par les référentiels BnF et IdRef.
 
-Le contrôle statistique des extractions est disponible dans
-`scripts/04_audit_unimarc.py` : pays, langues, dates, Dewey, indexations,
-résumés et signaux de documents hors périmètre. Voir les commandes, fichiers
-produits et limites dans [la documentation de l'audit](docs/quality-audit.md).
+La version actuelle se concentre sur la collecte, l'extraction, le contrôle
+qualité et l'enrichissement des données. Les fonctionnalités d'analyse avancée,
+de comparaison des profils de bibliothèques, de similarité, de clustering et
+l'interface Streamlit sont prévues pour les versions suivantes.
 
-Application locale d'exploration et d'analyse des collections signalées dans le Sudoc.
+> **Version en cours : 0.4.0 — jalon V0.4**
 
 ## Architecture actuelle et cible V1
 
@@ -29,6 +32,19 @@ Le dépôt implémente aujourd'hui un pipeline documentaire et technique couvran
 - la normalisation Dewey et la préparation de l'enrichissement BnF ;
 - les enrichissements BnF/IdRef ;
 - le chargement analytique local dans DuckDB.
+
+Les classifications IdRef des autorités liées aux seules `606$a` sont traitées
+séparément. Voir [la sélection, la structure JSON et l'accès DuckDB](docs/idref-subject-classifications.md).
+
+Le lot enrichi BnF et IdRef est chargé dans `data/sudoc.duckdb`. Voir
+[l'enrichissement et le schéma DuckDB](docs/enrichment-and-database.md) pour les
+commandes de reprise, la provenance des données et les requêtes SQL.
+
+Le contrôle statistique des extractions est disponible dans
+`scripts/04_audit_unimarc.py` : pays, langues, dates, Dewey, indexations,
+résumés et signaux de documents hors périmètre. Voir [la documentation de
+l'audit](docs/quality-audit.md) pour les commandes, les fichiers produits et les
+limites de ce contrôle.
 
 ### Cible V1 encore à venir
 
@@ -109,8 +125,7 @@ même chose :
 
 ## Installation (PowerShell, Python 3.11 ou supérieur)
 
-
-Si l’environnement virtuel `.venv` n’existe pas encore, créez-le :
+Si l'environnement virtuel `.venv` n'existe pas encore, créez-le :
 
 ```powershell
 python -m venv .venv
@@ -120,6 +135,7 @@ Puis installez le projet et ses dépendances en mode éditable :
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -e .
+```
 
 ## Collecter les bibliothèques
 

@@ -121,8 +121,9 @@ complète d'un cache déjà présent dans les dossiers d'enrichissement.
 
 ### Chargement du corpus enrichi
 
-Le dossier `data/enrichment/sample-2000/bnf-idref-v0.1.0` correspond ici au lot
-chargé dans DuckDB sous `corpus_id = sample-2000-2025-bnf-idref-v1`.
+Dans cet exemple de chargement, le dossier
+`data/enrichment/sample-2000/bnf-idref-v0.1.0` est chargé dans DuckDB sous
+`corpus_id = sample-2000-2025-bnf-idref-v1`.
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/07_load_corpus.py --enrichment-dir data/enrichment/sample-2000/bnf-idref-v0.1.0 --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-idref-v1 --year 2025
@@ -130,8 +131,9 @@ chargé dans DuckDB sous `corpus_id = sample-2000-2025-bnf-idref-v1`.
 
 ### Chargement de l'enrichissement d'autorités
 
-Le dossier `data/enrichment/sample-2000/idref-606a-v0.1.0` complète ensuite ce
-corpus avec `run_id = idref-606a-v1`, sans changer l'identifiant de corpus.
+Dans cet exemple, le dossier `data/enrichment/sample-2000/idref-606a-v0.1.0`
+complète ensuite ce corpus avec `run_id = idref-606a-v1`, sans changer
+l'identifiant de corpus.
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/09_load_authority_enrichment.py --enrichment-dir data/enrichment/sample-2000/idref-606a-v0.1.0 --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-idref-v1 --run-id idref-606a-v1

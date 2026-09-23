@@ -70,6 +70,8 @@ scripts/
 
 ## 1.4. Organisation du dépôt documentée à partir de l'arborescence réelle
 
+L'arborescence ci-dessous part de la racine réelle du dépôt `analyseur_sudoc/`.
+
 ```text
 analyseur_sudoc/
 ├── README.md

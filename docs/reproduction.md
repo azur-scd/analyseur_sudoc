@@ -46,7 +46,7 @@ Ces tests s'exécutent sans collecte réseau supplémentaire.
 ```
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/01_fetch_references.py --run-dir data/reference/listrcr/<date>
+.\.venv\Scripts\python.exe scripts/01_fetch_references.py --run-dir data/reference/listrcr/DATE_CAMPAGNE
 ```
 
 Le TSV `listrcr` et l'enrichissement IdRef nécessitent le réseau, sauf si les
@@ -63,7 +63,7 @@ fichiers déjà présents dans le dossier de campagne sont réutilisés.
 ```
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025 --page-size 200 --max-records 2000 --run-dir data/raw/sudoc/2025/<campagne>
+.\.venv\Scripts\python.exe scripts/02_fetch_sudoc.py --year 2025 --page-size 200 --max-records 2000 --run-dir data/raw/sudoc/2025/NOM_CAMPAGNE
 ```
 
 Ces commandes créent ou réutilisent des campagnes locales dans

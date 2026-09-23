@@ -2,7 +2,8 @@
 
 ## Sélection
 
-Entrée : le lot enrichi BnF/IdRef de 1 995 notices. Toutes sont traitées, y
+Entrée : le lot enrichi BnF/IdRef de 1 995 notices retenues sur le premier
+corpus de 2 000 notices de documents parus en 2025. Toutes sont traitées, y
 compris celles ayant déjà une Dewey Sudoc ou BnF. La collecte est bornée aux
 autorités liées aux 606$a présentes dans ce lot ; ce n'est pas une collecte
 du catalogue Sudoc ou d'IdRef complet.
@@ -14,7 +15,8 @@ zones (600, 607, 608, etc.). Un identifiant absent, invalide ou ambigu est
 signalé sans recherche par libellé ni attribution depuis une subdivision.
 Les répétitions sont conservées. Une même autorité n'est téléchargée qu'une fois.
 
-Dans ce lot : 6 585 occurrences de 606$a, 4 291 liées à 2 925 PPN distincts.
+Dans ce premier corpus : 6 585 occurrences de 606$a, 4 291 liées à 2 925 PPN
+distincts.
 
 ## Classifications récupérées
 
@@ -83,10 +85,11 @@ les tables DOCUMENT, CLASSIFICATION ou HOLDING :
 ```
 
 Les tables AUTHORITY_RUN, AUTHORITY_DOCUMENT (JSON complet enrichi),
-AUTHORITY_HEADING et AUTHORITY_CLASSIFICATION conservent ce nouveau résultat
-séparément. Le chargement vérifie l'identité du lot et l'absence de modifications
-des données bibliographiques. Il est transactionnel et sans effet si le même
-enrichissement est déjà chargé.
+AUTHORITY_HEADING et AUTHORITY_CLASSIFICATION conservent séparément ce résultat
+obtenu sur le premier corpus de 2 000 notices de documents parus en 2025. Le
+chargement vérifie l'identité du lot et l'absence de modifications des données
+bibliographiques. Il est transactionnel et sans effet si le même enrichissement
+est déjà chargé.
 
 ```sql
 -- Classes distinctes par notice et par méthode IdRef.

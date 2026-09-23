@@ -24,15 +24,17 @@ toutes les notices sans Dewey exploitable et les notations encore à examiner.
 Les CSV comportent PPN, titre, indices bruts et normalisés, règles, annotations,
 URL BnF avec origine 033/035 et référence XML.
 
-Résultat sur les 1 995 notices : 714 → 758 notices avec Dewey exploitable,
-soit 44 notices supplémentaires et 38,00 % de couverture. Sur les 1 237
-notices restant à enrichir, 24 ont une URL BnF et 1 213 n'en ont pas.
+Résultat sur le premier corpus de 2 000 notices de documents parus en 2025
+(1 995 notices retenues) : 714 → 758 notices avec Dewey exploitable, soit 44
+notices supplémentaires et 38,00 % de couverture. Sur les 1 237 notices restant
+à enrichir, 24 ont une URL BnF et 1 213 n'en ont pas.
 Les 24 liens constituent un lot candidat, sans garantie de présence d'une
 Dewey ni vérification distante de la correspondance. Aucun téléchargement
 BnF ni recherche par ISBN n'est réalisé à cette étape.
 
-Décision utilisateur : toutes les 1 995 notices sont conservées, y compris
+Décision utilisateur pour ce premier corpus de 2 000 notices de documents
+parus en 2025 : toutes les 1 995 notices retenues sont conservées, y compris
 les travaux universitaires édités et les autres cas litigieux de périmètre.
-Les alertes des audits précédents restent des observations historiques et
-ne doivent pas déclencher d'exclusion. Le filtre antérieur sans 930$b reste
-appliqué aux cinq notices écartées du lot brut de 2 000.
+Les alertes des audits précédents restent des observations historiques et ne
+doivent pas déclencher d'exclusion. Le filtre antérieur sans 930$b reste
+appliqué aux cinq notices écartées de ce lot brut de 2 000.

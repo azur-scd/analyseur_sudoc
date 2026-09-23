@@ -128,6 +128,10 @@ complète d'un cache déjà présent dans les dossiers d'enrichissement.
 
 ## 7. Chargement DuckDB
 
+Le chargement est documenté en deux temps : d'abord le corpus bibliographique
+issu du lot `bnf-idref-v0.1.0`, puis l'enrichissement d'autorités `idref-606a`
+chargé séparément sur ce même corpus via `scripts/09_load_authority_enrichment.py`.
+
 ### Chargement du corpus enrichi
 
 Dans cet exemple de chargement, le dossier

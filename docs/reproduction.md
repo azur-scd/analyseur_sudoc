@@ -180,7 +180,9 @@ SELECT ppn, occurrence, value FROM SUMMARY;
 -- Classes distinctes par notice et par méthode IdRef.
 SELECT DISTINCT ppn, scheme, code
 FROM AUTHORITY_CLASSIFICATION
-WHERE run_id = 'idref-606a-v1' AND code IS NOT NULL;
+WHERE run_id = 'idref-606a-v1'
+  AND corpus_id = 'sample-2000-2025-bnf-idref-v1'
+  AND code IS NOT NULL;
 ```
 
 ```sql
@@ -192,5 +194,7 @@ WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1' AND dewey_normalized IS NOT NU
 UNION ALL
 SELECT DISTINCT ppn, 'idref:' || scheme AS methode, code
 FROM AUTHORITY_CLASSIFICATION
-WHERE run_id = 'idref-606a-v1' AND code IS NOT NULL;
+WHERE run_id = 'idref-606a-v1'
+  AND corpus_id = 'sample-2000-2025-bnf-idref-v1'
+  AND code IS NOT NULL;
 ```

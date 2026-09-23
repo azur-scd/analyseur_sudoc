@@ -2,8 +2,18 @@
 ## PRD — Document des Exigences Produit
 
 **Version :** 1.0  
-**Statut :** validé pour la V1  
+**Statut :** spécification cible validée pour la V1  
 **Nature :** application locale d'exploration et d'analyse des collections signalées dans le Sudoc
+
+> **Positionnement du document**
+>
+> Ce document décrit l'état cible, le périmètre fonctionnel et les décisions de conception prévues pour la V1.
+>
+> Il ne constitue pas une description de l'état actuel du projet.
+>
+> Les fonctionnalités décrites comme incluses ou prévues expriment des exigences de la V1 et non nécessairement un état d'implémentation.
+>
+> L'avancement réel du projet doit être suivi séparément.
 
 ---
 

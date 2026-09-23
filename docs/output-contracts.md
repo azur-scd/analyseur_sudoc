@@ -53,9 +53,10 @@ Autres sorties documentées de la même famille :
 | `authority-classifications.jsonl` | Occurrences de classifications d'autorité reliées aux documents. | Couple logique `ppn` bibliographique / PPN d'autorité | Distingue `scheme`, `code_raw`, `code`, les sous-zones intégrales et le chemin `via_606a`. | Conserve les répétitions et les méthodes séparées. |
 
 La documentation mentionne aussi un **rapport JSON d'enrichissement** pour ce
-lot d'autorités, avec les statuts des liens `606$a`, les comptes d'autorités
-distinctes et les résultats de collecte. Son nom de fichier n'est pas figé dans
-les documents sources consultés ; il reste donc un artefact documentaire utile,
+lot d'autorités du premier corpus de 2 000 notices de documents parus en 2025,
+avec les statuts des liens `606$a`, les comptes d'autorités distinctes et les
+résultats de collecte. Son nom de fichier n'est pas figé dans les documents
+sources consultés ; il reste donc un artefact documentaire utile,
 mais non listé ici comme contrat de nommage stable.
 
 ## 5. Chargement DuckDB

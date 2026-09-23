@@ -9,7 +9,8 @@ Ce plan distingue :
 
 # 1. Couverture automatisée actuellement présente
 
-Les tests hors réseau s'exécutent avec :
+Les tests hors réseau s'exécutent avec la commande actuellement documentée pour
+**PowerShell sous Windows** :
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v

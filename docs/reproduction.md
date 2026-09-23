@@ -3,6 +3,8 @@
 Ce document réutilise les commandes déjà présentes dans le README et les autres
 documents. Les dossiers `data/…` cités ci-dessous sont des artefacts locaux non
 versionnés. Les étapes de collecte et certains enrichissements dépendent du réseau.
+Les commandes reprises ici sont celles déjà documentées pour **PowerShell sous
+Windows**.
 
 ## Convention des identifiants d'exemple
 

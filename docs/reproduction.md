@@ -11,8 +11,11 @@ Windows**.
 Les commandes et requêtes reprises ci-dessous réemploient les identifiants déjà
 documentés pour le lot de démonstration :
 
-- `corpus_id` d'exemple : `sample-2000-2025-bnf-idref-v1` ;
-- `run_id` d'exemple : `idref-606a-v1`.
+| Niveau | Valeur d'exemple | Usage dans le parcours |
+|---|---|---|
+| Nom local du lot collecté | `sample-2000` | Dossiers sous `data/raw/`, `data/processed/` et `data/enrichment/` |
+| `corpus_id` DuckDB | `sample-2000-2025-bnf-idref-v1` | Chargement du corpus enrichi et requêtes SQL associées |
+| `run_id` DuckDB | `idref-606a-v1` | Chargement séparé des classifications d'autorité et requêtes SQL associées |
 
 ## 1. Installation
 

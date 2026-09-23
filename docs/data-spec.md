@@ -160,71 +160,197 @@ La chaîne `null` est convertie en vraie valeur nulle.
 
 # 9. Modèle de données
 
-## DOCUMENT
+Cette section décrit le **schéma DuckDB implémenté** (tables et vues). Les sections
+précédentes décrivent le modèle logique cible et les données sources.
 
-- ppn
-- title
-- subtitle
-- publication_year
-- language
-- country
+## 9.1 Tables physiques persistées
 
-## PUBLISHER
+### CORPUS
 
-- ppn
-- publisher
-- source_field
+Portée : 1 ligne par corpus (`corpus_id`).
 
-## AUTHOR
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| corpus_id | VARCHAR | PK |
+| year_requested | INTEGER |  |
+| source_dir | VARCHAR |  |
+| signature | VARCHAR |  |
+| loaded_at | TIMESTAMPTZ |  |
+| report | JSON |  |
 
-- ppn
-- source_field
-- name
-- firstname
-- authority_id
-- role
+### LIBRARY
 
-## CLASSIFICATION
+Portée : référentiel global partagé entre corpus (clé `rcr`).
 
-- ppn
-- dewey_raw
-- dewey_normalized
-- dewey_1
-- dewey_2
-- dewey_3
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| rcr | VARCHAR | PK |
+| label | VARCHAR |  |
+| iln | VARCHAR |  |
+| library_ppn | VARCHAR |  |
+| library_type | VARCHAR |  |
+| city | VARCHAR |  |
+| postal_code | VARCHAR |  |
+| country | VARCHAR |  |
+| latitude | DOUBLE |  |
+| longitude | DOUBLE |  |
+| metadata_retrieved_at | TIMESTAMPTZ |  |
 
-## LIBRARY
+### CORPUS_LIBRARY
 
-- rcr
-- label
-- iln
-- library_ppn
-- library_type
-- city
-- postal_code
-- country
-- latitude
-- longitude
-- metadata_retrieved_at
+Portée : rattachement d'une bibliothèque à un corpus (`corpus_id`, `rcr`).
 
-## HOLDING
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| corpus_id | VARCHAR | PK (composite), FK → `CORPUS(corpus_id)` |
+| rcr | VARCHAR | PK (composite), FK → `LIBRARY(rcr)` |
+| metadata | JSON |  |
 
-- ppn
-- rcr
+### DOCUMENT
 
-Cette table matérialise le graphe fondamental :
+Portée : 1 ligne par document et par corpus (`corpus_id`, `ppn`).
 
-`DOCUMENT ↔ LIBRARY`
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| corpus_id | VARCHAR | PK (composite), FK → `CORPUS(corpus_id)` |
+| ppn | VARCHAR | PK (composite) |
+| title | VARCHAR |  |
+| subtitle | VARCHAR |  |
+| publication_year | INTEGER |  |
+| scope_status | VARCHAR |  |
+| source | JSON |  |
+| payload | JSON |  |
 
-## LIBRARY_GROUP — expérimental
+### HOLDING
 
-- group_id
-- label
+Portée : relation document–bibliothèque par corpus (`corpus_id`, `ppn`, `rcr`).
 
-## LIBRARY_GROUP_MEMBER — expérimental
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| corpus_id | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| ppn | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| rcr | VARCHAR | PK (composite), FK → `LIBRARY(rcr)` |
+| evidence | JSON |  |
 
-- group_id
-- rcr
+Cette table matérialise le graphe fondamental : `DOCUMENT ↔ LIBRARY` (via `HOLDING`).
+
+### CLASSIFICATION
+
+Portée : occurrences de Dewey par document et par corpus (`corpus_id`, `ppn`, `occurrence`).
+
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| corpus_id | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| ppn | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| occurrence | INTEGER | PK (composite) |
+| dewey_raw | VARCHAR |  |
+| dewey_normalized | VARCHAR |  |
+| dewey_1 | VARCHAR |  |
+| dewey_2 | VARCHAR |  |
+| dewey_3 | VARCHAR |  |
+| source | VARCHAR |  |
+| annotation | VARCHAR |  |
+| payload | JSON |  |
+
+### DOCUMENT_FIELD
+
+Portée : valeurs documentaires répétables par catégorie (`corpus_id`, `ppn`, `category`, `occurrence`).
+
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| corpus_id | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| ppn | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| category | VARCHAR | PK (composite) |
+| occurrence | INTEGER | PK (composite) |
+| payload | JSON |  |
+
+### AUTHORITY_RUN
+
+Portée : 1 exécution d'enrichissement d'autorités (`run_id`) rattachée à un corpus.
+
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| run_id | VARCHAR | PK |
+| corpus_id | VARCHAR | FK → `CORPUS(corpus_id)` |
+| documents_sha256 | VARCHAR |  |
+| loaded_at | TIMESTAMPTZ |  |
+| report | JSON |  |
+
+### AUTHORITY_DOCUMENT
+
+Portée : documents enrichis dans une exécution (`run_id`, `ppn`), avec rattachement au corpus/document d'origine.
+
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| run_id | VARCHAR | PK (composite), FK → `AUTHORITY_RUN(run_id)` |
+| corpus_id | VARCHAR | FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| ppn | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| payload | JSON |  |
+
+### AUTHORITY_HEADING
+
+Portée : occurrences de liens d'autorité par document et par exécution (`run_id`, `ppn`, `occurrence`).
+
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| run_id | VARCHAR | PK (composite), FK (composite) → `AUTHORITY_DOCUMENT(run_id, ppn)` |
+| ppn | VARCHAR | PK (composite), FK (composite) → `AUTHORITY_DOCUMENT(run_id, ppn)` |
+| occurrence | INTEGER | PK (composite) |
+| authority_ppn | VARCHAR |  |
+| status | VARCHAR |  |
+| payload | JSON |  |
+
+### AUTHORITY_CLASSIFICATION
+
+Portée : classifications issues des autorités par document et par exécution (`run_id`, `ppn`, `occurrence`).
+
+| Colonne | Type DuckDB | Contraintes |
+|---|---|---|
+| run_id | VARCHAR | PK (composite), FK (composite) → `AUTHORITY_DOCUMENT(run_id, ppn)` |
+| ppn | VARCHAR | PK (composite), FK (composite) → `AUTHORITY_DOCUMENT(run_id, ppn)` |
+| occurrence | INTEGER | PK (composite) |
+| requested_authority_ppn | VARCHAR |  |
+| resolved_authority_ppn | VARCHAR |  |
+| scheme | VARCHAR |  |
+| code_raw | VARCHAR |  |
+| code | VARCHAR |  |
+| source | VARCHAR |  |
+| payload | JSON |  |
+
+## 9.2 Vues dérivées (champs documentaires)
+
+`AUTHOR` et `PUBLISHER` ne sont pas des tables physiques : ce sont des vues
+`CREATE OR REPLACE VIEW` construites sur `DOCUMENT_FIELD` (filtrage par `category`),
+avec projection :
+
+- `corpus_id` (VARCHAR)
+- `ppn` (VARCHAR)
+- `occurrence` (INTEGER)
+- `source_field` (extrait JSON via `json_extract_string(payload, '$.source_field')`)
+- `value` (extrait JSON via `json_extract_string(payload, '$.value')`)
+- `payload` (JSON)
+
+Le même mécanisme est appliqué aux vues : `SUBJECT`, `SUMMARY`, `LANGUAGE`,
+`COUNTRY`, `BNF_LINK`, `LEADER_TYPE`, `CONTENT_TYPE`, `MEDIA_TYPE`,
+`NATURE_OF_CONTENT`, `LOCATION`, `CODED_DATE`, `PUBLICATION_STATEMENT`.
+
+## 9.3 Vues dérivées (profil des bibliothèques)
+
+La vue `LIBRARY_PROFILE` est calculée à partir de `HOLDING`, `LIBRARY` et
+`CLASSIFICATION` et agrège le nombre de documents et le nombre de documents avec Dewey
+par couple (`corpus_id`, `rcr`).
+
+## 9.4 Statut des tables de groupes de bibliothèques
+
+`LIBRARY_GROUP` et `LIBRARY_GROUP_MEMBER` restent un **modèle expérimental** dans cette
+spécification et ne sont pas implémentées dans le schéma DuckDB actuel.
+
+## 9.5 Remarque sur les contraintes
+
+Les clés primaires et étrangères ci-dessus correspondent aux déclarations SQL
+effectivement présentes. En dehors de ces clés, cette section ne suppose pas de
+contraintes supplémentaires (par exemple `NOT NULL`) qui ne seraient pas explicitement
+déclarées.
 
 # 10. Normalisation
 

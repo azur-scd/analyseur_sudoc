@@ -1,4 +1,4 @@
-# 4. Convention documentaire sur les versions
+# Convention documentaire sur les versions
 
 Plusieurs niveaux de version coexistent dans le projet :
 

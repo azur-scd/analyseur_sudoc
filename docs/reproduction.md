@@ -4,6 +4,14 @@ Ce document réutilise les commandes déjà présentes dans le README et les aut
 documents. Les dossiers `data/…` cités ci-dessous sont des artefacts locaux non
 versionnés. Les étapes de collecte et certains enrichissements dépendent du réseau.
 
+## Convention des identifiants d'exemple
+
+Les commandes et requêtes reprises ci-dessous réemploient les identifiants déjà
+documentés pour le lot de démonstration :
+
+- `corpus_id` d'exemple : `sample-2000-2025-bnf-idref-v1` ;
+- `run_id` d'exemple : `idref-606a-v1`.
+
 ## 1. Installation
 
 ```powershell

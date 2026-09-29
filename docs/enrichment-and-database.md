@@ -26,12 +26,20 @@ de notice ou un identifiant différent est conservé comme résultat sans ajout.
 Les Dewey Sudoc restent présentes. Chaque ajout porte `dewey_source=bnf:676$a`,
 l'ARK, la référence de champ, l'édition, les règles de normalisation et
 `enrichment_source` (requête, fichier XML, empreinte SHA-256 et date).
-Le rapprochement repose sur le lien BnF fourni par le Sudoc ; il ne comporte
-pas de nouveau rapprochement par titre ou ISBN.
+Pour une nouvelle campagne d'enrichissement, si la notice reste sans Dewey
+exploitable, le script cherche aussi dans le SRU BnF les ISBN `010$a` et EAN
+`073$a` de la notice Sudoc. Une requête avec une seule notice permet de reprendre
+ses `676$a` ; une réponse multiple ne donne aucun ajout pour cet identifiant.
+L'identifiant recherché, la méthode, la réponse et sa provenance restent tracés.
+Le rapprochement ne repose pas sur le titre.
 
-Les 24 notices ont été retrouvées ; 5 contiennent une Dewey, toutes exploitables.
-La couverture finale est de 763 / 1 995, soit 38,25 %. Les 19 autres réponses
-n'ont pas de 676$a. Aucun autre enrichissement Dewey n'est poursuivi.
+Dans le lot historique `bnf-idref-v0.1.0`, seules les recherches par lien BnF
+ont été exécutées : les 24 notices ont été retrouvées ; 5 contiennent une Dewey,
+toutes exploitables. Sa couverture est de 763 / 1 995, soit 38,25 %. Ce chiffre
+ne mesure pas encore les gains possibles par ISBN ou EAN ; une nouvelle campagne
+et un nouveau chargement sont nécessaires pour les mesurer. Le manifeste de cette
+nouvelle politique porte la version `0.2.0` et doit être créé dans un nouveau
+dossier de campagne ; le dossier historique `bnf-idref-v0.1.0` reste intact.
 
 Documentation : [API SRU Catalogue général BnF](https://api.bnf.fr/fr/api-sru-catalogue-general).
 

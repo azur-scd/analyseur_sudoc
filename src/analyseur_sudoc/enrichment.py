@@ -40,7 +40,7 @@ def ark_from_url(url):
     return match[1]
 
 
-def parse_bnf(raw, ark):
+def parse_bnf(raw, ark=None):
     root = etree.fromstring(raw, parser=etree.XMLParser(resolve_entities=False, no_network=True))
     ns = {"s": "http://www.loc.gov/zing/srw/"}
     if root.xpath('//*[local-name()="diagnostic"]'):
@@ -49,10 +49,14 @@ def parse_bnf(raw, ark):
     records = root.findall("s:records/s:record/s:recordData/*", ns)
     if count == 0 and not records:
         return dict(status="not_found", classifications=[])
-    if count != 1 or len(records) != 1:
+    if count != 1:
+        if ark is None:
+            return dict(status="multiple_matches", number_of_records=count, classifications=[])
         raise ValueError("La recherche ARK ne retourne pas une notice unique")
+    if len(records) != 1:
+        raise ValueError("La réponse BnF unique ne contient pas exactement une notice")
     record = records[0]
-    if record.get("id") != ark or record.get("format", "").upper() != "UNIMARC":
+    if (ark is not None and record.get("id") != ark) or record.get("format", "").upper() != "UNIMARC":
         return dict(status="identity_to_review", returned_id=record.get("id"), classifications=[])
     values, occurrences = [], Counter()
     title = []
@@ -70,7 +74,26 @@ def parse_bnf(raw, ark):
                                "dewey_source": "bnf:676$a", "bnf_ark": ark,
                                "editions": [{"raw": "".join(s.itertext()), "value": clean("".join(s.itertext()))}
                                             for s in children(field, "subfield") if s.get("code") == "v"]})
-    return dict(status="matched", title=title, classifications=values)
+    return dict(status="matched", returned_id=record.get("id"), title=title, classifications=values)
+
+
+def bnf_identifiers(document):
+    """Identifiants imprimés du Sudoc, sans les mentions de prix ou de reliure."""
+    found = []
+    for field in document.get("source_fields", []):
+        kind = {"010": "isbn", "073": "ean"}.get(field["source_field"])
+        if kind is None:
+            continue
+        for sub in field["subfields"]:
+            if sub["code"] != "a":
+                continue
+            value = re.sub(r"[\s-]", "", sub["raw"]).upper()
+            if (kind == "isbn" and re.fullmatch(r"(?:[0-9]{9}[0-9X]|[0-9]{13})", value)
+                    or kind == "ean" and re.fullmatch(r"[0-9]{13}", value)):
+                pair = (kind, value)
+                if pair not in found:
+                    found.append(pair)
+    return found
 
 
 def cached_fetch(client, url, path, delay):
@@ -100,8 +123,8 @@ def enrich(input_dir, run_dir, client, prior_reference=None, delay=0.3):
     extraction = json.loads((input_dir / "report.json").read_text(encoding="utf-8"))
     if extraction["status"] != "complete" or extraction["counts"]["documents"] != len(documents):
         raise ValueError("Extraction invalide ou incomplète")
-    manifest = dict(version="0.1.0", input_dir=str(input_dir), documents_sha256=digest(payload),
-                    policy="bnf_existing_links_only_missing_usable_dewey", delay_seconds=delay)
+    manifest = dict(version="0.2.0", input_dir=str(input_dir), documents_sha256=digest(payload),
+                    policy="bnf_links_then_unique_isbn_ean_missing_usable_dewey", delay_seconds=delay)
     run_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = run_dir / "manifest.json"
     if manifest_path.exists() and json.loads(manifest_path.read_text(encoding="utf-8")) != manifest:
@@ -110,7 +133,8 @@ def enrich(input_dir, run_dir, client, prior_reference=None, delay=0.3):
     report = dict(started_at=now(), status="running", errors=[], bnf=[], rcr_warnings=[])
     report_path = run_dir / "report.json"
     write_json(report_path, report)
-    candidates = [d for d in documents if d["bnf_links"] and not any(v["dewey_normalized"] for v in d["classifications"])]
+    candidates = [d for d in documents if not any(v["dewey_normalized"] for v in d["classifications"])
+                  and (d["bnf_links"] or bnf_identifiers(d))]
     for d in candidates:
         for url in sorted({v["url"] for v in d["bnf_links"]}):
             try:
@@ -128,6 +152,32 @@ def enrich(input_dir, run_dir, client, prior_reference=None, delay=0.3):
             except (httpx.HTTPError, ValueError, etree.XMLSyntaxError, TypeError) as exc:
                 report["errors"].append(dict(service="bnf", ppn=d["ppn"], url=url, error=str(exc)))
             write_json(report_path, report)
+        if not any(v["dewey_normalized"] for v in d["classifications"]):
+            for kind, identifier in bnf_identifiers(d):
+                try:
+                    request = httpx.Request("GET", "https://catalogue.bnf.fr/api/SRU", params={
+                        "version": "1.2", "operation": "searchRetrieve",
+                        "query": f'bib.{kind} adj "{identifier}"',
+                        "recordSchema": "unimarcXchange", "maximumRecords": 2, "startRecord": 1})
+                    raw, meta = cached_fetch(client, request.url,
+                                             run_dir / "bnf" / f"{kind}-{identifier}.xml", delay)
+                    result = parse_bnf(raw)
+                    report["bnf"].append(dict(ppn=d["ppn"], search_field=kind,
+                                              searched_identifier=identifier, **result))
+                    if result["status"] == "multiple_matches":
+                        break
+                    for item in result["classifications"]:
+                        item["enrichment_source"] = meta
+                        item["bnf_match_method"] = kind
+                        item["bnf_match_identifier"] = identifier
+                        item["bnf_ark"] = result["returned_id"]
+                        d["classifications"].append(item)
+                    if result["status"] == "matched":
+                        break
+                except (httpx.HTTPError, ValueError, etree.XMLSyntaxError, TypeError) as exc:
+                    report["errors"].append(dict(service="bnf", ppn=d["ppn"], search_field=kind,
+                                                 searched_identifier=identifier, error=str(exc)))
+                write_json(report_path, report)
     targets = {h["rcr"] for d in documents for h in d["holdings"]}
     raw, meta = cached_fetch(client, LISTRCR_URL, run_dir / "references" / "listrcr.tsv", delay)
     all_libraries = parse_listrcr(raw, meta["retrieved_at"], report["rcr_warnings"])

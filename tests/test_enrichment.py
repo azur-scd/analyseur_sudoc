@@ -8,7 +8,7 @@ import httpx
 from lxml import etree
 
 from analyseur_sudoc.database import FIELDS
-from analyseur_sudoc.enrichment import ark_from_url, cached_fetch, digest, parse_bnf, write_jsonl
+from analyseur_sudoc.enrichment import ark_from_url, bnf_identifiers, cached_fetch, digest, parse_bnf, write_jsonl
 from analyseur_sudoc.unimarc import parse_record
 from analyseur_sudoc.warehouse import load_corpus
 
@@ -38,6 +38,21 @@ class BnfTests(unittest.TestCase):
         self.assertEqual(ark_from_url("http://catalogue.bnf.fr/ark:/12148/cb487118969"), "ark:/12148/cb487118969")
         with self.assertRaises(ValueError):
             ark_from_url("https://catalogue.bnf.fr.invalid/ark:/12148/cb487118969")
+
+    def test_identifier_search_accepts_only_one_record(self):
+        result = parse_bnf(self.response())
+        self.assertEqual(result["status"], "matched")
+        self.assertEqual(result["returned_id"], "ark:/12148/cb487118969")
+        self.assertEqual(parse_bnf(self.response(count=2))["status"], "multiple_matches")
+
+    def test_isbn_and_ean_from_sudoc_fields(self):
+        document = {"source_fields": [
+            {"source_field": "010", "subfields": [{"code": "a", "raw": "978-2-1234-5678-9"},
+                                                  {"code": "b", "raw": "broché"}]},
+            {"source_field": "073", "subfields": [{"code": "a", "raw": "978 2 1234 5678 9"}]},
+            {"source_field": "010", "subfields": [{"code": "a", "raw": "invalid"}]}]}
+        self.assertEqual(bnf_identifiers(document),
+                         [("isbn", "9782123456789"), ("ean", "9782123456789")])
 
     def test_cached_response_and_tamper_detection(self):
         calls = []

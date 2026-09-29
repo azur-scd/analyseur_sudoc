@@ -4,12 +4,12 @@
 002;The book;Le livre
 003;Systems;Systèmes
 004;Computer science;Informatique
-005;Computer programming, programs, & data;Programmation informatique, programmes et données
+005;Computer programming, programs, and data;Programmation informatique, programmes et données
 006;Special computer methods;Méthodes informatiques particulières
 010;Bibliography;Bibliographie
 011;Bibliographies and catalogs;Bibliographies et catalogues
 012;Bibliographies and catalogs of individuals;Bibliographies et catalogues de personnes
-014;Of anonymous & pseudonymous works;Bibliographies et catalogues d’œuvres anonymes ou pseudonymes
+014;Of anonymous and pseudonymous works;Bibliographies et catalogues d’œuvres anonymes ou pseudonymes
 015;Of works from specific places;Bibliographies et catalogues d’œuvres provenant de lieux particuliers
 016;Of works on specific subjects;Bibliographies et catalogues d’œuvres sur des sujets particuliers
 017;General subject catalogs;Catalogues généraux par sujets
@@ -26,9 +26,9 @@
 031;General encyclopedic works in American English;Ouvrages encyclopédiques généraux en anglais américain
 032;General encyclopedic works in English;Ouvrages encyclopédiques généraux en anglais
 033;Encyclopedias in other Germanic languages;Encyclopédies en autres langues germaniques
-034;Encyclopedias in French, Occitan & Catalan;Encyclopédies en français, occitan et catalan
-035;Encyclopedias in Italian, Romanian & related languages;Encyclopédies en italien, roumain et langues apparentées
-036;Encyclopedias in Spanish, Portuguese & Galician;Encyclopédies en espagnol, portugais et galicien
+034;Encyclopedias in French, Occitan and Catalan;Encyclopédies en français, occitan et catalan
+035;Encyclopedias in Italian, Romanian and related languages;Encyclopédies en italien, roumain et langues apparentées
+036;Encyclopedias in Spanish, Portuguese and Galician;Encyclopédies en espagnol, portugais et galicien
 037;General encyclopedic works in Slavic languages;Ouvrages encyclopédiques généraux en langues slaves
 038;General encyclopedic works in Scandinavian languages;Ouvrages encyclopédiques généraux en langues scandinaves
 039;General encyclopedic works in other languages;Ouvrages encyclopédiques généraux en autres langues
@@ -36,13 +36,13 @@
 051;General serial publications in American English;Publications en série générales en anglais américain
 052;General serial publications in English;Publications en série générales en anglais
 053;Serials in other Germanic languages;Publications en série en autres langues germaniques
-054;Serials in French, Occitan & Catalan;Publications en série en français, occitan et catalan
-055;Serials in Italian, Romanian & related languages;Publications en série en italien, roumain et langues apparentées
-056;Serials in Spanish, Portuguese & Galician;Publications en série en espagnol, portugais et galicien
+054;Serials in French, Occitan and Catalan;Publications en série en français, occitan et catalan
+055;Serials in Italian, Romanian and related languages;Publications en série en italien, roumain et langues apparentées
+056;Serials in Spanish, Portuguese and Galician;Publications en série en espagnol, portugais et galicien
 057;General serial publications in Slavic languages;Publications en série générales en langues slaves
 058;Serials in Scandinavian languages;Publications en série en langues scandinaves
 059;General serial publications in other languages;Publications en série générales en autres langues
-060;General organizations & museum science;Organisations générales et muséologie
+060;General organizations and museum science;Organisations générales et muséologie
 061;General organizations in North America;Organisations générales en Amérique du Nord
 062;General organizations in British Isles;Organisations générales dans les îles Britanniques
 063;"General organizations in Germany; in Central Europe";"Organisations générales en Allemagne ; en Europe centrale"
@@ -66,9 +66,9 @@
 081;General collections in American English;Recueils généraux en anglais américain
 082;General collections in English;Recueils généraux en anglais
 083;General collections in other Germanic languages;Recueils généraux en autres langues germaniques
-084;General collections in French, Occitan & Catalan;Recueils généraux en français, occitan et catalan
-085;Collections in Italian, Romanian & related languages;Recueils en italien, roumain et langues apparentées
-086;Collections in Spanish, Portuguese & Galician;Recueils en espagnol, portugais et galicien
+084;General collections in French, Occitan and Catalan;Recueils généraux en français, occitan et catalan
+085;Collections in Italian, Romanian and related languages;Recueils en italien, roumain et langues apparentées
+086;Collections in Spanish, Portuguese and Galician;Recueils en espagnol, portugais et galicien
 087;General collections in Slavic languages;Recueils généraux en langues slaves
 088;General collections in Scandinavian languages;Recueils généraux en langues scandinaves
 089;General collections in other languages;Recueils généraux en autres langues
@@ -82,13 +82,13 @@
 097;Books notable for ownership or origin;Livres remarquables par leur provenance ou leur ancien possesseur
 098;Prohibited works, forgeries, hoaxes;Ouvrages interdits, faux et canulars
 099;Books notable for format;Livres remarquables par leur format
-100;Philosophy & psychology;Philosophie et psychologie
+100;Philosophy and psychology;Philosophie et psychologie
 101;Theory of philosophy;Théorie de la philosophie
 102;Miscellany of philosophy;Mélanges de philosophie
-103;Dictionaries & encyclopedias;Dictionnaires et encyclopédies
+103;Dictionaries and encyclopedias;Dictionnaires et encyclopédies
 105;Serial publications of philosophy;Publications en série de philosophie
-106;Organizations & management;Organisations et gestion
-107;Education, research & related topics;Enseignement, recherche et sujets connexes
+106;Organizations and management;Organisations et gestion
+107;Education, research and related topics;Enseignement, recherche et sujets connexes
 108;Groups of people;Groupes de personnes
 109;History and collected biography;Histoire et biographies collectives
 110;Metaphysics;Métaphysique
@@ -111,7 +111,7 @@
 129;Origin and destiny of individual souls;Origine et destinée des âmes individuelles
 130;Parapsychology and occultism;Parapsychologie et occultisme
 131;Parapsychological and occult methods;Méthodes parapsychologiques et occultes
-133;Specific topics in parapsychology & occultism;Sujets particuliers de parapsychologie et d'occultisme
+133;Specific topics in parapsychology and occultism;Sujets particuliers de parapsychologie et d'occultisme
 135;Dreams and mysteries;Rêves et mystères
 137;Divinatory graphology;Graphologie divinatoire
 138;Physiognomy;Physiognomonie
@@ -124,13 +124,13 @@
 145;Sensationalism;Sensationnalisme
 146;Naturalism and related systems;Naturalisme et systèmes apparentés
 147;Pantheism and related systems;Panthéisme et systèmes apparentés
-148;Eclecticism, liberalism, & traditionalism;Éclectisme, libéralisme et traditionalisme
+148;Eclecticism, liberalism, and traditionalism;Éclectisme, libéralisme et traditionalisme
 149;Other philosophical systems and doctrines;Autres systèmes et doctrines philosophiques
 150;Psychology;Psychologie
-152;Perception, movement, emotions & drives;Perception, mouvement, émotions et pulsions
-153;Conscious mental processes & intelligence;Processus mentaux conscients et intelligence
-154;Subconscious & altered states;Subconscient et états modifiés de conscience
-155;Differential & developmental psychology;Psychologie différentielle et psychologie du développement
+152;Perception, movement, emotions and drives;Perception, mouvement, émotions et pulsions
+153;Conscious mental processes and intelligence;Processus mentaux conscients et intelligence
+154;Subconscious and altered states;Subconscient et états modifiés de conscience
+155;Differential and developmental psychology;Psychologie différentielle et psychologie du développement
 156;Comparative psychology;Psychologie comparée
 158;Applied psychology;Psychologie appliquée
 160;Philosophical logic;Logique philosophique
@@ -146,12 +146,12 @@
 172;Political ethics;Éthique politique
 173;Ethics of family relationships;Éthique des relations familiales
 174;Occupational ethics;Éthique professionnelle
-175;Ethics of recreation & leisure;Éthique des loisirs
-176;Ethics of sex & reproduction;Éthique de la sexualité et de la reproduction
+175;Ethics of recreation and leisure;Éthique des loisirs
+176;Ethics of sex and reproduction;Éthique de la sexualité et de la reproduction
 177;Ethics of social relations;Éthique des relations sociales
 178;Ethics of consumption;Éthique de la consommation
 179;Other ethical norms;Autres normes éthiques
-180;Ancient, medieval & eastern philosophy;Philosophie antique, médiévale et orientale
+180;Ancient, medieval and eastern philosophy;Philosophie antique, médiévale et orientale
 181;Eastern philosophy;Philosophie orientale
 182;Pre-Socratic Greek philosophies;Philosophies grecques présocratiques
 183;Sophistic, Socratic, related philosophies;Philosophies sophistique, socratique et apparentées
@@ -172,7 +172,7 @@
 198;Philosophy of Scandinavia and Finland;Philosophie de la Scandinavie et de la Finlande
 199;Philosophy of other geographic areas;Philosophie des autres régions géographiques
 200;Religion;Religion
-201;Religious mythology & social theology;Mythologie religieuse et théologie sociale
+201;Religious mythology and social theology;Mythologie religieuse et théologie sociale
 202;Doctrines;Doctrines
 203;Public worship and other practices;Culte public et autres pratiques
 204;Religious experience, life, practice;Expérience, vie et pratique religieuses
@@ -183,7 +183,7 @@
 209;Sects and reform movements;Sectes et mouvements de réforme
 210;Philosophy and theory of religion;Philosophie et théorie de la religion
 211;Concepts of God;Conceptions de Dieu
-212;Existence, knowability & attributes of God;Existence, connaissabilité et attributs de Dieu
+212;Existence, knowability and attributes of God;Existence, connaissabilité et attributs de Dieu
 213;Creation;Création
 214;Theodicy;Théodicée
 215;Science and religion;Science et religion
@@ -205,7 +205,7 @@
 234;Salvation and grace;Salut et grâce
 235;Spiritual beings;Êtres spirituels
 236;Eschatology;Eschatologie
-238;Creeds & catechisms;Credos et catéchismes
+238;Creeds and catechisms;Credos et catéchismes
 239;Apologetics and polemics;Apologétique et polémiques
 240;Christian moral and devotional theology;Théologie morale et dévotionnelle chrétienne
 241;Christian ethics;Éthique chrétienne
@@ -221,7 +221,7 @@
 253;Pastoral work (Pastoral theology);Ministère pastoral (théologie pastorale)
 254;Local church administration;Administration de l'église locale
 255;Religious congregations and orders;Congrégations et ordres religieux
-259;Pastoral care of families & groups of people;Accompagnement pastoral des familles et des groupes de personnes
+259;Pastoral care of families and groups of people;Accompagnement pastoral des familles et des groupes de personnes
 260;Christian social and ecclesiastical theology;Théologie sociale et ecclésiastique chrétienne
 261;Social theology and interreligious relations;Théologie sociale et relations interreligieuses
 262;Ecclesiology;Ecclésiologie
@@ -235,29 +235,29 @@
 270;History, geographic treatment, biography;Histoire, traitement géographique, biographie
 271;Religious orders in church history;Ordres religieux dans l'histoire de l'Église
 272;Persecutions in general church history;Persécutions dans l'histoire générale de l'Église
-273;Doctrinal controversies & heresies;Controverses doctrinales et hérésies
+273;Doctrinal controversies and heresies;Controverses doctrinales et hérésies
 274;History of Christianity in Europe;Histoire du christianisme en Europe
 275;History of Christianity in Asia;Histoire du christianisme en Asie
 276;History of Christianity in Africa;Histoire du christianisme en Afrique
 277;History of Christianity in North America;Histoire du christianisme en Amérique du Nord
 278;History of Christianity in South America;Histoire du christianisme en Amérique du Sud
 279;History of Christianity in other areas;Histoire du christianisme en autres régions
-280;Denominations & sects of Christian church;Confessions et sectes chrétiennes
+280;Denominations and sects of Christian church;Confessions et sectes chrétiennes
 281;Early church and Eastern churches;Église primitive et Églises orientales
 282;Roman Catholic Church;Église catholique romaine
 283;Anglican churches;Églises anglicanes
 284;Protestants of Continental origin;Protestants d'origine continentale européenne
-285;Presbyterian, Reformed & Congregational;Églises presbytériennes, réformées et congrégationalistes
-286;Baptist, Restoration & Adventist;Églises baptistes, restaurationnistes et adventistes
+285;Presbyterian, Reformed and Congregational;Églises presbytériennes, réformées et congrégationalistes
+286;Baptist, Restoration and Adventist;Églises baptistes, restaurationnistes et adventistes
 287;Methodist and related churches;Églises méthodistes et apparentées
 289;Other denominations and sects;Autres confessions et sectes
 290;Other religions;Autres religions
-292;Classical religion (Greek & Roman religion);Religion classique (religions grecque et romaine)
+292;Classical religion (Greek and Roman religion);Religion classique (religions grecque et romaine)
 293;Germanic religion;Religion germanique
 294;Religions of Indic origin;Religions d'origine indienne
 295;Zoroastrianism (Mazdaism, Parseeism);Zoroastrisme (mazdéisme, parsisme)
 296;Judaism;Judaïsme
-297;Islam, Babism & Bahai Faith;Islam, babisme et foi bahá'íe
+297;Islam, Babism and Bahai Faith;Islam, babisme et foi bahá'íe
 299;Religions not provided for elsewhere;Religions non classées ailleurs
 300;Social sciences;Sciences sociales
 301;Sociology and anthropology;Sociologie et anthropologie
@@ -296,22 +296,22 @@
 340;Law;Droit
 341;Law of nations;Droit international
 342;Constitutional and administrative law;Droit constitutionnel et administratif
-343;Military, tax, trade & industrial law;Droit militaire, fiscal, commercial et industriel
-344;Labor, social, education & cultural law;Droit du travail, droit social, droit de l'éducation et de la culture
+343;Military, tax, trade and industrial law;Droit militaire, fiscal, commercial et industriel
+344;Labor, social, education and cultural law;Droit du travail, droit social, droit de l'éducation et de la culture
 345;Criminal law;Droit pénal
 346;Private law;Droit privé
 347;Procedure and courts;Procédure et tribunaux
 348;Laws, regulations, cases;Lois, règlements et jurisprudence
-349;Law of specific jurisdictions & areas;Droit de juridictions et territoires particuliers
+349;Law of specific jurisdictions and areas;Droit de juridictions et territoires particuliers
 350;Public administration and military science;Administration publique et science militaire
 351;Public administration;Administration publique
 352;General considerations of public administration;Considérations générales sur l’administration publique
 353;Specific fields of public administration;Domaines particuliers de l’administration publique
-354;Administration of economy & environment;Administration de l’économie et de l’environnement
+354;Administration of economy and environment;Administration de l’économie et de l’environnement
 355;Military science;Science militaire
-356;Foot forces & warfare;Forces terrestres et guerre
-357;Mounted forces & warfare;Forces montées et guerre
-358;Air & other specialized forces;Forces aériennes et autres forces spécialisées
+356;Foot forces and warfare;Forces terrestres et guerre
+357;Mounted forces and warfare;Forces montées et guerre
+358;Air and other specialized forces;Forces aériennes et autres forces spécialisées
 359;Naval forces and warfare;Forces navales et guerre maritime
 360;"Social problems and services; associations";"Problèmes et services sociaux ; associations"
 361;Social problems and services;Problèmes et services sociaux
@@ -352,7 +352,7 @@
 400;Language;Langues
 401;"Philosophy and theory; international languages";"Philosophie et théorie ; langues internationales"
 402;Miscellany;Mélanges
-403;Dictionaries & encyclopedias;Dictionnaires et encyclopédies
+403;Dictionaries and encyclopedias;Dictionnaires et encyclopédies
 404;Special topics of language;Sujets particuliers relatifs aux langues
 405;Serial publications;Publications en série
 406;Organizations and management;Organisations et gestion
@@ -363,12 +363,12 @@
 411;Writing systems;Systèmes d'écriture
 412;Etymology;Étymologie
 413;Dictionaries;Dictionnaires
-414;Phonology & phonetics;Phonologie et phonétique
+414;Phonology and phonetics;Phonologie et phonétique
 415;Grammar;Grammaire
 417;Dialectology and historical linguistics;Dialectologie et linguistique historique
 418;Applied linguistics;Linguistique appliquée
 419;Sign languages;Langues des signes
-420;English & Old English (Anglo-Saxon);Anglais et vieil anglais (anglo-saxon)
+420;English and Old English (Anglo-Saxon);Anglais et vieil anglais (anglo-saxon)
 421;Writing system, phonology, phonetics;Système d'écriture, phonologie, phonétique
 422;Etymology of standard English;Étymologie de l’anglais
 423;Dictionaries of standard English;Dictionnaires de l’anglais
@@ -384,7 +384,7 @@
 437;German language variations;Variétés de la langue allemande
 438;Standard German usage;Usage de l’allemand standard
 439;Other Germanic languages;Autres langues germaniques
-440;French & related Romance languages;Français et langues romanes apparentées
+440;French and related Romance languages;Français et langues romanes apparentées
 441;Writing system, phonology, phonetics;Système d'écriture, phonologie, phonétique
 442;Etymology of standard French;Étymologie du français
 443;Dictionaries of standard French;Dictionnaires du français
@@ -392,7 +392,7 @@
 447;French language variations;Variétés de la langue française
 448;Standard French usage;Usage du français standard
 449;Occitan, Catalan, Franco-Provençal;Occitan, Catalan, Franco-Provençal
-450;Italian, Romanian & related languages;Italien, roumain et langues apparentées
+450;Italian, Romanian and related languages;Italien, roumain et langues apparentées
 451;Writing system, phonology, phonetics;Système d'écriture, phonologie, phonétique
 452;Etymology of standard Italian;Étymologie de l’italien
 453;Dictionaries of standard Italian;Dictionnaires de l’italien
@@ -428,16 +428,16 @@
 491;East Indo-European and Celtic languages;Langues indo-européennes orientales et celtiques
 492;Afro-Asiatic languages;Langues afro-asiatiques
 493;Non-Semitic Afro-Asiatic languages;Langues afro-asiatiques non sémitiques
-494;Altaic, Uralic, Hyperborean & Dravidian;Langues altaïques, ouraliennes, hyperboréennes et dravidiennes
+494;Altaic, Uralic, Hyperborean and Dravidian;Langues altaïques, ouraliennes, hyperboréennes et dravidiennes
 495;Languages of east and southeast Asia;Langues d'Asie de l'Est et du Sud-Est
 496;African languages;Langues africaines
 497;North American native languages;Langues autochtones d'Amérique du Nord
 498;South American native languages;Langues autochtones d'Amérique du Sud
-499;Austronesian & other languages;Langues austronésiennes et autres langues
+499;Austronesian and other languages;Langues austronésiennes et autres langues
 500;Natural sciences and mathematics;Sciences naturelles et mathématiques
 501;Philosophy and theory;Philosophie et théorie
 502;Miscellany;Mélanges
-503;Dictionaries & encyclopedias;Dictionnaires et encyclopédies
+503;Dictionaries and encyclopedias;Dictionnaires et encyclopédies
 505;Serial publications;Publications en série
 506;Organizations and management;Organisations et gestion
 507;Education, research, related topics;Enseignement, recherche et sujets connexes
@@ -454,7 +454,7 @@
 519;Probabilities and applied mathematics;Probabilités et mathématiques appliquées
 520;Astronomy and allied sciences;Astronomie et sciences connexes
 521;Celestial mechanics;Mécanique céleste
-522;Techniques, equipment & materials;Techniques, équipements et matériaux
+522;Techniques, equipment and materials;Techniques, équipements et matériaux
 523;Specific celestial bodies and phenomena;Corps et phénomènes célestes particuliers
 525;Earth (Astronomical geography);Terre (géographie astronomique)
 526;Mathematical geography;Géographie mathématique
@@ -473,7 +473,7 @@
 539;Modern physics;Physique moderne
 540;Chemistry and allied sciences;Chimie et sciences connexes
 541;Physical chemistry;Chimie physique
-542;Techniques, equipment & materials;Techniques, équipements et matériaux
+542;Techniques, equipment and materials;Techniques, équipements et matériaux
 543;Analytical chemistry;Chimie analytique
 546;Inorganic chemistry;Chimie minérale
 547;Organic chemistry;Chimie organique
@@ -492,25 +492,25 @@
 560;Paleontology;Paléontologie
 561;"Paleobotany; fossil microorganisms";"Paléobotanique ; micro-organismes fossiles"
 562;Fossil invertebrates;Invertébrés fossiles
-563;Fossil marine & seashore invertebrates;Invertébrés fossiles marins et littoraux
-564;Fossil Mollusca & Molluscoidea;Mollusques et molluscoïdes fossiles
+563;Fossil marine and seashore invertebrates;Invertébrés fossiles marins et littoraux
+564;Fossil Mollusca and Molluscoidea;Mollusques et molluscoïdes fossiles
 565;Fossil Arthropoda;Arthropodes fossiles
 566;Fossil Chordata;Chordés fossiles
 567;Fossil cold-blooded vertebrates;Vertébrés à sang froid fossiles
 568;Fossil Aves (birds);Oiseaux fossiles
 569;Fossil Mammalia;Mammifères fossiles
 570;Biology;Biologie
-571;Physiology & related subjects;Physiologie et sujets connexes
+571;Physiology and related subjects;Physiologie et sujets connexes
 572;Biochemistry;Biochimie
 573;Specific physiological systems in animals;Systèmes physiologiques particuliers chez les animaux
-575;Specific parts of & systems in plants;Parties et systèmes particuliers chez les plantes
+575;Specific parts of and systems in plants;Parties et systèmes particuliers chez les plantes
 576;Genetics and evolution;Génétique et évolution
 577;Ecology;Écologie
 578;Natural history of organisms;Histoire naturelle des organismes
-579;Microorganisms, fungi & algae;Micro-organismes, champignons et algues
+579;Microorganisms, fungi and algae;Micro-organismes, champignons et algues
 580;Plants;Plantes
 581;Specific topics in natural history of plants;Sujets particuliers d’histoire naturelle des plantes
-582;Plants noted for characteristics & flowers;Plantes remarquables par leurs caractéristiques et leurs fleurs
+582;Plants noted for characteristics and flowers;Plantes remarquables par leurs caractéristiques et leurs fleurs
 583;Eudicots and Ceratophyllales;Eudicotylédones et Ceratophyllales
 584;Monocots, Chloranthales, magnoliids;Monocotylédones, Chloranthales et magnoliidées
 585;Pinophyta;Pinophyta
@@ -520,7 +520,7 @@
 590;Animals;Animaux
 591;Specific topics in natural history of animals;Sujets particuliers d’histoire naturelle des animaux
 592;Invertebrates;Invertébrés
-593;Marine & seashore invertebrates;Invertébrés marins et littoraux
+593;Marine and seashore invertebrates;Invertébrés marins et littoraux
 594;Mollusca and Molluscoidea;Mollusques et molluscoïdes
 595;Arthropoda;Arthropodes
 596;Chordata;Chordés
@@ -540,11 +540,11 @@
 610;Medicine and health;Médecine et santé
 611;Human anatomy, cytology, histology;Anatomie humaine, cytologie, histologie
 612;Human physiology;Physiologie humaine
-613;Personal health & safety;Santé et sécurité personnelles
+613;Personal health and safety;Santé et sécurité personnelles
 614;"Forensic medicine; incidence of disease";"Médecine légale ; incidence des maladies"
 615;Pharmacology and therapeutics;Pharmacologie et thérapeutique
 616;Diseases;Maladies
-617;Surgery & related medical specialties;Chirurgie et spécialités médicales connexes
+617;Surgery and related medical specialties;Chirurgie et spécialités médicales connexes
 618;Gynecology, obstetrics, pediatrics, geriatrics;Gynécologie, obstétrique, pédiatrie, gériatrie
 620;Engineering and allied operations;Ingénierie et activités connexes
 621;Applied physics;Physique appliquée
@@ -553,10 +553,10 @@
 624;Civil engineering;Génie civil
 625;Engineering of railroads and roads;Ingénierie ferroviaire et routière
 627;Hydraulic engineering;Génie hydraulique
-628;Environmental & sanitary engineering;Génie environnemental et sanitaire
+628;Environmental and sanitary engineering;Génie environnemental et sanitaire
 629;Other branches of engineering;Autres branches de l'ingénierie
 630;Agriculture and related technologies;Agriculture et technologies connexes
-631;Techniques, equipment & materials;Techniques, équipements et matériaux
+631;Techniques, equipment and materials;Techniques, équipements et matériaux
 632;Plant injuries, diseases, pests;Dommages, maladies et ravageurs des plantes
 633;Field and plantation crops;Cultures de plein champ et de plantation
 634;Orchards, fruits, forestry;Vergers, fruits, sylviculture
@@ -564,17 +564,17 @@
 636;Animal husbandry;Élevage
 637;Processing dairy and related products;Transformation des produits laitiers et produits connexes
 638;Insect culture;Élevage d’insectes
-639;Hunting, fishing & conservation;Chasse, pêche et conservation
+639;Hunting, fishing and conservation;Chasse, pêche et conservation
 640;Home and family management;Gestion du foyer et de la famille
 641;Food and drink;Aliments et boissons
 642;Meals and table service;Repas et service de table
 643;Housing and household equipment;Logement et équipement ménager
 644;Household utilities;Services domestiques
 645;Household furnishings;Ameublement du foyer
-646;Sewing, clothing & personal living;Couture, vêtements et vie personnelle
+646;Sewing, clothing and personal living;Couture, vêtements et vie personnelle
 647;Management of public households;Gestion des établissements collectifs
 648;Housekeeping;Entretien ménager
-649;Child rearing & home care of people;Éducation des enfants et soins à domicile
+649;Child rearing and home care of people;Éducation des enfants et soins à domicile
 650;Management and auxiliary services;Gestion et services auxiliaires
 651;Office services;Services de bureau
 652;Processes of written communication;Procédés de communication écrite
@@ -584,16 +584,16 @@
 659;Advertising and public relations;Publicité et relations publiques
 660;Chemical engineering;Génie chimique
 661;Technology of industrial chemicals;Technologie des produits chimiques industriels
-662;Explosives, fuels & related products;Explosifs, combustibles et produits connexes
+662;Explosives, fuels and related products;Explosifs, combustibles et produits connexes
 663;Beverage technology;Technologie des boissons
 664;Food technology;Technologie alimentaire
-665;Industrial oils, fats, waxes & gases;Huiles, graisses, cires et gaz industriels
-666;Ceramic & allied technologies;Céramique et technologies connexes
-667;Cleaning, color & coating technologies;Technologies du nettoyage, de la coloration et du revêtement
+665;Industrial oils, fats, waxes and gases;Huiles, graisses, cires et gaz industriels
+666;Ceramic and allied technologies;Céramique et technologies connexes
+667;Cleaning, color and coating technologies;Technologies du nettoyage, de la coloration et du revêtement
 668;Technology of other organic products;Technologie des autres produits organiques
 669;Metallurgy;Métallurgie
 670;Manufacturing;Fabrication
-671;Metalworking & primary metal products;Travail des métaux et produits métalliques primaires
+671;Metalworking and primary metal products;Travail des métaux et produits métalliques primaires
 672;Iron, steel, other iron alloys;Fer, acier et autres alliages ferreux
 673;Nonferrous metals;Métaux non ferreux
 674;Lumber processing, wood products, cork;Transformation du bois, produits en bois et liège
@@ -605,30 +605,30 @@
 680;Manufacture of products for specific uses;Fabrication de produits destinés à des usages particuliers
 681;Precision instruments and other devices;Instruments de précision et autres appareils
 682;Small forge work (Blacksmithing);Petite forge (travail du forgeron)
-683;Hardware, weapons & household appliances;Quincaillerie, armes et appareils ménagers
+683;Hardware, weapons and household appliances;Quincaillerie, armes et appareils ménagers
 684;Furnishings and home workshops;Ameublement et ateliers domestiques
-685;Leather, fur goods & related products;Articles en cuir, fourrure et produits connexes
+685;Leather, fur goods and related products;Articles en cuir, fourrure et produits connexes
 686;Printing and related activities;Imprimerie et activités connexes
 687;Clothing and accessories;Vêtements et accessoires
-688;Other final products & packaging;Autres produits finis et emballages
+688;Other final products and packaging;Autres produits finis et emballages
 690;Construction of buildings;Construction de bâtiments
 691;Building materials;Matériaux de construction
 692;Auxiliary construction practices;Techniques auxiliaires de construction
-693;Specific materials & purposes;Matériaux et usages particuliers
+693;Specific materials and purposes;Matériaux et usages particuliers
 694;Wood construction;Construction en bois
 695;Roof covering;Couverture des toits
 696;Utilities;Équipements techniques
-697;Heating, ventilating & air-conditioning;Chauffage, ventilation et climatisation
+697;Heating, ventilating and air-conditioning;Chauffage, ventilation et climatisation
 698;Detail finishing;Travaux de finition
 700;The arts;Arts
-701;Philosophy of fine & decorative arts;Philosophie des beaux-arts et des arts décoratifs
+701;Philosophy of fine and decorative arts;Philosophie des beaux-arts et des arts décoratifs
 702;Miscellany of fine and decorative arts;Mélanges sur les beaux-arts et les arts décoratifs
-703;Dictionaries of fine & decorative arts;Dictionnaires des beaux-arts et des arts décoratifs
+703;Dictionaries of fine and decorative arts;Dictionnaires des beaux-arts et des arts décoratifs
 704;Special topics in fine and decorative arts;Sujets particuliers des beaux-arts et des arts décoratifs
-705;Serial publications of fine & decorative arts;Publications en série sur les beaux-arts et les arts décoratifs
-706;Organizations & management;Organisations et gestion
-707;Education, research & related topics;Enseignement, recherche et sujets connexes
-708;Galleries, museums & private collections;Galeries, musées et collections privées
+705;Serial publications of fine and decorative arts;Publications en série sur les beaux-arts et les arts décoratifs
+706;Organizations and management;Organisations et gestion
+707;Education, research and related topics;Enseignement, recherche et sujets connexes
+708;Galleries, museums and private collections;Galeries, musées et collections privées
 709;History, geographic treatment, biography;Histoire, traitement géographique, biographie
 710;Area planning and landscape architecture Area;Aménagement du territoire et architecture du paysage
 711;planning (Civic art);Aménagement urbain (art civique)
@@ -647,9 +647,9 @@
 724;Architecture from 1400;Architecture depuis 1400
 725;Public structures;Édifices publics
 726;Buildings for religious and related purposes;Bâtiments à usage religieux et connexe
-727;Buildings for education & research;Bâtiments destinés à l'enseignement et à la recherche
+727;Buildings for education and research;Bâtiments destinés à l'enseignement et à la recherche
 728;Residential and related buildings;Bâtiments résidentiels et connexes
-729;Design & decoration;Conception et décoration
+729;Design and decoration;Conception et décoration
 730;Sculpture and related arts;Sculpture et arts connexes
 731;Processes, forms, subjects of sculpture;Procédés, formes et sujets de la sculpture
 732;Sculpture to ca. 500;Sculpture jusqu'à env. 500
@@ -671,15 +671,15 @@
 748;Glass;Verre
 749;Furniture and accessories;Mobilier et accessoires
 750;Painting and paintings;Peinture et tableaux
-751;Techniques, equipment, materials & forms;Techniques, équipements, matériaux et formes
+751;Techniques, equipment, materials and forms;Techniques, équipements, matériaux et formes
 752;Color;Couleur
 753;Symbolism, allegory, mythology, legend;Symbolisme, allégorie, mythologie, légende
 754;Genre paintings;Peinture de genre
 755;Religion;Religion
 757;Human figures;Figure humaine
-758;Nature, cityscapes & other subjects;Nature, paysages urbains et autres sujets
+758;Nature, cityscapes and other subjects;Nature, paysages urbains et autres sujets
 759;History, geographic treatment, biography;Histoire, traitement géographique, biographie
-760;Printmaking & prints;Gravure et estampes
+760;Printmaking and prints;Gravure et estampes
 761;Relief processes (Block printing);Procédés en relief (gravure sur bois)
 763;Lithographic processes;Procédés lithographiques
 764;Chromolithography and serigraphy;Chromolithographie et sérigraphie
@@ -688,21 +688,21 @@
 767;Etching and drypoint;Eau-forte et pointe sèche
 769;Prints;Estampes
 770;Photography, computer art, cinematography;Photographie, art numérique, cinématographie
-771;Techniques, equipment & materials;Techniques, équipements et matériaux
+771;Techniques, equipment and materials;Techniques, équipements et matériaux
 772;Metallic salt processes;Procédés aux sels métalliques
 773;Pigment processes of printing;Procédés d'impression aux pigments
 774;Holography;Holographie
 776;Computer art (Digital art);Art numérique
 777;Cinematography and videography;Cinématographie et vidéographie
-778;Specific fields & kinds of photography;Domaines et genres particuliers de photographie
+778;Specific fields and kinds of photography;Domaines et genres particuliers de photographie
 779;Photographic images;Images photographiques
 780;Music;Musique
 781;General principles and musical forms;Principes généraux et formes musicales
 782;Vocal music;Musique vocale
 783;Music for single voices;Musique pour voix solistes
-784;Instruments & instrumental ensembles;Instruments et ensembles instrumentaux
+784;Instruments and instrumental ensembles;Instruments et ensembles instrumentaux
 785;Ensembles with one instrument per part;Ensembles avec un instrument par partie
-786;Keyboard & other instruments;Instruments à clavier et autres instruments
+786;Keyboard and other instruments;Instruments à clavier et autres instruments
 787;Stringed instruments (Chordophones);Instruments à cordes (cordophones)
 788;Wind instruments (Aerophones);Instruments à vent (aérophones)
 790;Recreational and performing arts;Arts du spectacle et loisirs
@@ -718,12 +718,12 @@
 800;Literature (Belles-lettres) and rhetoric;Littérature (belles-lettres) et rhétorique
 801;Philosophy and theory;Philosophie et théorie
 802;Miscellany;Mélanges
-803;Dictionaries & encyclopedias;Dictionnaires et encyclopédies
+803;Dictionaries and encyclopedias;Dictionnaires et encyclopédies
 805;Serial publications;Publications en série
 806;Organizations and management;Organisations et gestion
 807;Education, research, related topics;Enseignement, recherche et sujets connexes
-808;Rhetoric & collections of literature;Rhétorique et recueils littéraires
-809;History, description & criticism;Histoire, description et critique
+808;Rhetoric and collections of literature;Rhétorique et recueils littéraires
+809;History, description and criticism;Histoire, description et critique
 810;American literature in English;Littérature américaine de langue anglaise
 811;American poetry in English;Poésie américaine en anglais
 812;American drama in English;Théâtre américain en anglais
@@ -733,7 +733,7 @@
 816;American letters in English;Correspondance américaine en anglais
 817;American humor and satire in English;Humour et satire américaines en anglais
 818;American miscellaneous writings;Écrits divers américains
-820;English & Old English literatures;Littératures anglaise et vieil-anglaise
+820;English and Old English literatures;Littératures anglaise et vieil-anglaise
 821;English poetry;Poésie anglaise
 822;English drama;Théâtre anglais
 823;English fiction;Fiction anglaise
@@ -743,7 +743,7 @@
 827;English humor and satire;Humour et satire anglaises
 828;English miscellaneous writings;Écrits divers anglais
 829;Old English (Anglo-Saxon) literature;Littérature vieil-anglaise (anglo-saxonne)
-830;German & related literatures;Littérature allemande et littératures apparentées
+830;German and related literatures;Littérature allemande et littératures apparentées
 831;German poetry;Poésie allemande
 832;German drama;Théâtre allemand
 833;German fiction;Fiction allemande
@@ -762,8 +762,8 @@
 846;French letters;Correspondance française
 847;French humor and satire;Humour et satire françaises
 848;French miscellaneous writings;Écrits divers française
-849;Occitan & Catalan literatures;Littératures occitane et catalane
-850;Italian, Romanian & related literatures;Littératures italienne, roumaine et apparentées
+849;Occitan and Catalan literatures;Littératures occitane et catalane
+850;Italian, Romanian and related literatures;Littératures italienne, roumaine et apparentées
 851;Italian poetry;Poésie italienne
 852;Italian drama;Théâtre italien
 853;Italian fiction;Fiction italienne
@@ -772,8 +772,8 @@
 856;Italian letters;Correspondance italienne
 857;Italian humor and satire;Humour et satire italiennes
 858;Italian miscellaneous writings;Écrits divers italiens
-859;Romanian & related literatures;Littérature roumaine et littératures apparentées
-860;Spanish & Portuguese literatures;Littératures espagnole et portugaise
+859;Romanian and related literatures;Littérature roumaine et littératures apparentées
+860;Spanish and Portuguese literatures;Littératures espagnole et portugaise
 861;Spanish poetry;Poésie espagnole
 862;Spanish drama;Théâtre espagnole
 863;Spanish fiction;Fiction espagnole
@@ -783,7 +783,7 @@
 867;Spanish humor and satire;Humour et satire espagnole
 868;Spanish miscellaneous writings;Écrits divers espagnole
 869;Portuguese and Galician literatures;Littératures portugaise et galicienne
-870;Latin & related Italic literatures;Littérature latine et littératures italiques apparentées
+870;Latin and related Italic literatures;Littérature latine et littératures italiques apparentées
 871;Latin poetry;Poésie latine
 872;Latin dramatic poetry and drama;Poésie dramatique et théâtre latins
 873;Latin epic poetry and fiction;Poésie épique et fiction latines
@@ -793,9 +793,9 @@
 877;Latin humor and satire;Humour et satire latins
 878;Latin miscellaneous writings;Écrits divers latins
 879;Literatures of other Italic languages;Littératures des autres langues italiques
-880;Classical Greek & Hellenic literatures;Littérature grecque classique et littératures helléniques
+880;Classical Greek and Hellenic literatures;Littérature grecque classique et littératures helléniques
 881;Classical Greek poetry;Poésie grecs classiques
-882;Classical Greek dramatic poetry & drama;Poésie dramatique et théâtre grecs classiques
+882;Classical Greek dramatic poetry and drama;Poésie dramatique et théâtre grecs classiques
 883;Classical Greek epic poetry and fiction;Poésie épique et fiction grecques classiques
 884;Classical Greek lyric poetry;Poésie lyrique grecque classique
 885;Classical Greek speeches;Discours grecs classiques
@@ -807,20 +807,20 @@
 891;East Indo-European and Celtic literatures;Littératures indo-européennes orientales et celtiques
 892;Afro-Asiatic literatures;littératures Afro-Asiatiques
 893;Non-Semitic Afro-Asiatic literatures;Littératures Afro-asiatiques non sémitiques
-894;Altaic, Uralic, Hyperborean & Dravidian literatures;Littératures altaïques, ouraliennes, hyperboréennes et dravidiennes
+894;Altaic, Uralic, Hyperborean and Dravidian literatures;Littératures altaïques, ouraliennes, hyperboréennes et dravidiennes
 895;Literatures of East and Southeast Asia;Littératures d'Asie de l'Est et du Sud-Est
 896;African literatures;Littératures africaines
 897;North American native literatures;Littératures autochtones d'Amérique du Nord
 898;South American native literatures;Littératures autochtones d'Amérique du Sud
-899;Austronesian & other literatures;Littératures austronésiennes et autres littératures
-900;History & geography;Histoire et géographie
+899;Austronesian and other literatures;Littératures austronésiennes et autres littératures
+900;History and geography;Histoire et géographie
 901;Philosophy and theory of history;Philosophie et théorie de l'histoire
 902;Miscellany of history;Mélanges historiques
-903;Dictionaries & encyclopedias;Dictionnaires et encyclopédies
+903;Dictionaries and encyclopedias;Dictionnaires et encyclopédies
 904;Collected accounts of events;Recueils de récits d'événements
 905;Serial publications of history;Publications en série d'histoire
-906;Organizations & management;Organisations et gestion
-907;Education, research & related topics;Enseignement, recherche et sujets connexes
+906;Organizations and management;Organisations et gestion
+907;Education, research and related topics;Enseignement, recherche et sujets connexes
 908;Groups of people;Groupes de personnes
 909;World history;Histoire mondiale
 910;Geography and travel;Géographie et voyages
@@ -830,19 +830,19 @@
 914;Geography of and travel in Europe;Géographie et voyages en Europe
 915;Geography of and travel in Asia;Géographie et voyages en Asie
 916;Geography of and travel in Africa;Géographie et voyages en Afrique
-917;Geography of & travel in North America;Géographie et voyages en Amérique du Nord
-918;Geography of & travel in South America;Géographie et voyages en Amérique du Sud
+917;Geography of and travel in North America;Géographie et voyages en Amérique du Nord
+918;Geography of and travel in South America;Géographie et voyages en Amérique du Sud
 919;Geography of and travel in other areas;Géographie et voyages en autres régions
 920;Biography, genealogy, insignia;Biographie, généalogie, insignes
-929;Genealogy, names & insignia;Généalogie, noms et insignes
+929;Genealogy, names and insignia;Généalogie, noms et insignes
 930;History of ancient world to ca. 499;Histoire du monde antique jusqu'à env. 499
 931;History of China to 420;Histoire de la Chine jusqu'en 420
 932;History of Egypt to 640;Histoire de l'Égypte jusqu'en 640
 933;History of Palestine to 70;Histoire de la Palestine jusqu'en 70
 934;History of India to 647;Histoire de l'Inde jusqu'en 647
-935;History of Mesopotamia & Iranian Plateau to 637;Histoire de la Mésopotamie et plateau iranien jusqu'en 637
-936;History of Europe north & west of Italy to ca. 499;Histoire de l'Europe au nord et à l'ouest de l'Italie jusqu'à env. 499
-937;History of Italy & adjacent territories to 476;Histoire de l'Italie et territoires adjacents jusqu'en 476
+935;History of Mesopotamia and Iranian Plateau to 637;Histoire de la Mésopotamie et plateau iranien jusqu'en 637
+936;History of Europe north and west of Italy to ca. 499;Histoire de l'Europe au nord et à l'ouest de l'Italie jusqu'à env. 499
+937;History of Italy and adjacent territories to 476;Histoire de l'Italie et territoires adjacents jusqu'en 476
 938;History of Greece to 323;Histoire de la Grèce jusqu'en 323
 939;History of Other parts of ancient world;Histoire des Autres parties du monde antique
 940;History of Europe;Histoire de l'Europe
@@ -859,7 +859,7 @@
 951;History of China and adjacent areas;Histoire de la Chine et régions adjacentes
 952;History of Japan;Histoire du Japon
 953;History of Arabian Peninsula and adjacent areas;Histoire de la Péninsule Arabique et régions adjacentes
-954;History of India & south Asia;Histoire de l'Inde et Asie du Sud
+954;History of India and south Asia;Histoire de l'Inde et Asie du Sud
 955;History of Iran;Histoire de l'Iran
 956;History of Middle East (Near East);Histoire du Moyen-Orient (Proche-Orient)
 957;History of Siberia (Asiatic Russia);Histoire de la Sibérie (Russie asiatique)
@@ -873,7 +873,7 @@
 965;History of Algeria;Histoire de l'Algérie
 966;History of West Africa and offshore islands;Histoire de l'Afrique de l'Ouest et îles au large
 967;History of Central Africa and offshore islands;Histoire de l'Afrique centrale et îles au large
-968;History of South Africa & southern Africa;Histoire de l'Afrique du Sud et Afrique australe
+968;History of South Africa and southern Africa;Histoire de l'Afrique du Sud et Afrique australe
 969;History of South Indian Ocean islands;Histoire des Îles du sud de l'océan Indien
 970;History of History of North America;Histoire de l'Amérique du Nord
 971;History of Canada;Histoire du Canada
@@ -884,7 +884,7 @@
 976;History of South central United States;Histoire des États-Unis du centre-sud
 977;History of North central United States;Histoire des États-Unis du centre-nord
 978;History of Western United States;Histoire des États-Unis de l'ouest
-979;History of Great Basin & Pacific Slope region;Histoire du Grand Bassin et versant du Pacifique
+979;History of Great Basin and Pacific Slope region;Histoire du Grand Bassin et versant du Pacifique
 980;History of South America;Histoire de l'Amérique du Sud
 981;History of Brazil;Histoire du Brésil
 982;History of Argentina;Histoire de l'Argentine
@@ -898,8 +898,8 @@
 990;History of other areas;Histoire des autres régions
 993;New Zealand;Histoire de la Nouvelle-Zélande
 994;Australia;Histoire de l'Australie
-995;New Guinea & Melanesia;Histoire de la Nouvelle-Guinée et Mélanésie
-996;Polynesia & Pacific Ocean islands;Histoire de la Polynésie et îles de l'océan Pacifique
+995;New Guinea and Melanesia;Histoire de la Nouvelle-Guinée et Mélanésie
+996;Polynesia and Pacific Ocean islands;Histoire de la Polynésie et îles de l'océan Pacifique
 997;Atlantic Ocean islands;Histoire des Îles de l'océan Atlantique
 998;Arctic islands and Antarctica;Histoire des Îles arctiques et Antarctique
 999;Extraterrestrial worlds;Histoire des Mondes extraterrestres

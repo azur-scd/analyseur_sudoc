@@ -56,6 +56,48 @@ def compare_unique_codes(documents):
             "levels": results, "details": detail_rows}
 
 
+def compare_multiple_codes(documents):
+    """Compare les ensembles de codes des notices ayant plusieurs indices détaillés."""
+    groups = (
+        ("une Dewey / plusieurs Rameau", lambda b, r: len(b) == 1 and len(r) > 1),
+        ("plusieurs Dewey / un Rameau", lambda b, r: len(b) > 1 and len(r) == 1),
+        ("plusieurs des deux côtés", lambda b, r: len(b) > 1 and len(r) > 1),
+    )
+    details = []
+    for ppn, doc in sorted(documents.items()):
+        bibliographic = doc["sudoc"] | doc["bnf"]
+        rameau = doc["rameau"]
+        group = next((name for name, accepts in groups if accepts(bibliographic, rameau)), None)
+        if group is None:
+            continue
+        for width in (3, 2, 1):
+            dewey_codes = {code[:width] for code in bibliographic}
+            rameau_codes = {code[:width] for code in rameau}
+            common = dewey_codes & rameau_codes
+            result = "complet" if dewey_codes == rameau_codes else "partiel" if common else "aucun"
+            details.append(dict(ppn=ppn, title=doc["title"], group=group, level=width,
+                original_dewey_count=len(bibliographic), original_rameau_count=len(rameau),
+                dewey=sorted(dewey_codes), rameau=sorted(rameau_codes), common=sorted(common),
+                dewey_only=sorted(dewey_codes - rameau_codes),
+                rameau_only=sorted(rameau_codes - dewey_codes), result=result))
+    counts = Counter((row["group"], row["level"], row["result"]) for row in details)
+    summaries = []
+    for group, _ in groups:
+        for width in (3, 2, 1):
+            total = sum(counts[group, width, result] for result in ("complet", "partiel", "aucun"))
+            summaries.append(dict(group=group, level=width, records=total,
+                complete=counts[group, width, "complet"], partial=counts[group, width, "partiel"],
+                none=counts[group, width, "aucun"]))
+    for width in (3, 2, 1):
+        rows = [row for row in summaries if row["level"] == width]
+        summaries.append(dict(group="Total", level=width,
+            records=sum(row["records"] for row in rows),
+            complete=sum(row["complete"] for row in rows),
+            partial=sum(row["partial"] for row in rows),
+            none=sum(row["none"] for row in rows)))
+    return {"records": len(details) // 3, "groups": summaries, "details": details}
+
+
 def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
     database, bnf_dir, rameau_dir, output_dir = map(
         lambda p: Path(p).resolve(), (database, bnf_dir, rameau_dir, output_dir))
@@ -124,6 +166,7 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
     distribution = Counter(tuple(len(d[k]) for k in categories) for d in documents.values())
     total_codes = {key: sum(len(d[key]) for d in documents.values()) for key in categories}
     comparison = compare_unique_codes(documents)
+    multiple = compare_multiple_codes(documents)
 
     lines = ["# Synthèse des classifications du corpus", "",
         f"- Corpus DuckDB : `{corpus_id}`",
@@ -173,6 +216,27 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
     lines += [f"| {key} | {value} |" for key, value in sorted(comparison["excluded_records"].items())]
     lines += ["", "Le fichier `comparaison-dewey-rameau.csv` contient les codes et les résultats "
               "par notice aux trois niveaux.", ""]
+    lines += ["", "## Notices avec plusieurs classifications", "",
+        "Cette analyse porte sur les notices ayant plusieurs codes détaillés Sudoc/BnF et/ou "
+        "plusieurs domaines Rameau, avec au moins un code de chaque côté. Les codes sont dédoublonnés "
+        "par notice dans l'union Sudoc/BnF et dans Rameau. À chaque niveau, les préfixes de 3, 2 ou "
+        "1 chiffre sont de nouveau dédoublonnés : `531` et `532` donnent ainsi une seule classe `53`. "
+        "Une correspondance complète signifie que les deux ensembles sont égaux ; une correspondance "
+        "partielle signifie qu'ils ont au moins un code commun sans être égaux ; aucune correspondance "
+        "signifie que leur intersection est vide.", "",
+        "| Configuration initiale | Niveau | Notices | Complet | Partiel | Aucun |",
+        "|---|---:|---:|---:|---:|---:|"]
+    for row in multiple["groups"]:
+        level_label = f"{row['level']} chiffre" + ("s" if row["level"] > 1 else "")
+        lines.append(f"| {row['group']} | {level_label} | {row['records']} | "
+                     f"{row['complete']} ({100 * row['complete'] / row['records']:.1f} %) | "
+                     f"{row['partial']} ({100 * row['partial'] / row['records']:.1f} %) | "
+                     f"{row['none']} ({100 * row['none'] / row['records']:.1f} %) |"
+                     if row["records"] else
+                     f"| {row['group']} | {level_label} | 0 | 0 | 0 | 0 |")
+    lines += ["", f"Notices analysées dans ces trois configurations : **{multiple['records']}**. "
+              "Le CSV `comparaison-dewey-rameau-multiples.csv` donne les ensembles, leur intersection "
+              "et les codes propres à chaque côté pour chaque notice et chaque niveau.", ""]
     lines += ["", "## Détail par notice", "",
               "Le CSV associé donne pour chaque PPN les codes distincts de chaque source.", ""]
     (output_dir / "rapport.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -196,11 +260,23 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
             writer.writerow([row["ppn"], row["dewey"], row["rameau"], row["dewey_3"],
                 row["rameau_3"], row["match_3"], row["dewey_2"], row["rameau_2"],
                 row["match_2"], row["dewey_1"], row["rameau_1"], row["match_1"]])
+    with (output_dir / "comparaison-dewey-rameau-multiples.csv").open(
+            "w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.writer(stream, delimiter=";")
+        writer.writerow(["ppn", "titre", "configuration", "niveau_chiffres",
+            "nombre_dewey_detailles", "nombre_rameau_detailles", "codes_dewey",
+            "codes_rameau", "codes_communs", "dewey_seuls", "rameau_seuls", "resultat"])
+        for row in multiple["details"]:
+            writer.writerow([row["ppn"], row["title"], row["group"], row["level"],
+                row["original_dewey_count"], row["original_rameau_count"],
+                *[" | ".join(row[key]) for key in
+                  ("dewey", "rameau", "common", "dewey_only", "rameau_only")], row["result"]])
     (output_dir / "statistics.json").write_text(json.dumps({
         "corpus_id": corpus_id, "records": n, "coverage_records": coverage,
         "all_classifications_records": all_covered,
         "any_bibliographic_dewey_records": combined_dewey,
         "dewey_rameau_comparison": {key: value for key, value in comparison.items() if key != "details"},
+        "dewey_rameau_multiple_comparison": {key: value for key, value in multiple.items() if key != "details"},
         "distinct_codes_per_record_totals": total_codes,
         "distribution": [{"sudoc": a, "bnf": b, "idref_dewey": c,
             "rameau": d, "records": count} for (a,b,c,d), count in sorted(distribution.items())],

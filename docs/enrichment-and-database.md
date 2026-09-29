@@ -81,7 +81,11 @@ retient que les notices ayant exactement un code bibliographique distinct
 3 chiffres, puis de leurs préfixes à 2 et 1 chiffre. Les autres configurations
 restent hors de cette comparaison initiale. Un même code détaillé présent dans
 Sudoc et BnF ne compte qu'une fois. Le résultat détaillé par notice est exporté
-dans `comparaison-dewey-rameau.csv`.
+dans `comparaison-dewey-rameau.csv`. Le tableau suivant du même rapport traite
+les notices avec plusieurs codes d'un côté ou des deux : correspondance complète,
+partielle ou absente à 3, 2 et 1 chiffre après dédoublonnage des préfixes. Les
+ensembles et leurs intersections figurent dans
+`comparaison-dewey-rameau-multiples.csv`.
 
 ## Stockage
 

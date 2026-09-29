@@ -87,6 +87,16 @@ partielle ou absente à 3, 2 et 1 chiffre après dédoublonnage des préfixes. L
 ensembles et leurs intersections figurent dans
 `comparaison-dewey-rameau-multiples.csv`.
 
+La couverture par source est aussi recalculée pour les notices dont la zone
+`102$a` contient `FR` (même avec d'autres codes pays), et pour toutes les autres
+notices, y compris celles sans code pays. Chaque pourcentage utilise l'effectif
+de son groupe comme dénominateur.
+Une analyse exploratoire compare aussi la présence d'une Dewey Sudoc/BnF,
+d'un indice via les autorités (Dewey IdRef ou domaine Rameau), puis d'au moins
+un indice des deux voies. Elle indique l'écart de proportions et le résultat
+du test exact de Fisher ; elle ne permet pas d'attribuer causalement un écart
+au pays de publication.
+
 ## Stockage
 
 Le chargement est transactionnel. Il vérifie les empreintes, effectifs,

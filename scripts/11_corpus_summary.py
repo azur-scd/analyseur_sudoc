@@ -3,6 +3,7 @@
 import argparse
 import csv
 import json
+import math
 from collections import Counter
 from pathlib import Path
 
@@ -98,6 +99,86 @@ def compare_multiple_codes(documents):
     return {"records": len(details) // 3, "groups": summaries, "details": details}
 
 
+def coverage_summary(documents, categories):
+    """Calcule les mêmes indicateurs de couverture pour tout sous-ensemble de notices."""
+    n = len(documents)
+    coverage = {key: sum(bool(d[key]) for d in documents.values()) for key in categories}
+    total_codes = {key: sum(len(d[key]) for d in documents.values()) for key in categories}
+    return {"records": n, "coverage_records": coverage, "distinct_codes_per_record_totals": total_codes,
+        "all_classifications_records": sum(any(d[key] for key in categories) for d in documents.values()),
+        "any_dewey_records": sum(bool(d["sudoc"] or d["bnf"] or d["idref_dewey"])
+                                 for d in documents.values())}
+
+
+def coverage_table(summary, categories, labels, coverage_label="Couverture du corpus"):
+    """Rend le tableau de couverture avec le dénominateur du sous-ensemble."""
+    n = summary["records"]
+    percent = lambda count: f"{100 * count / n:.2f}" if n else "0.00"
+    format_count = lambda count: f"{count:,}".replace(",", " ")
+    lines = [f"| Source | Notices avec au moins un code | {coverage_label} | Codes distincts cumulés par notice |",
+             "|---|---:|---:|---:|"]
+    for key in categories:
+        count = summary["coverage_records"][key]
+        codes = summary["distinct_codes_per_record_totals"][key]
+        lines.append(f"| {labels[key]} | {format_count(count)} | {percent(count)} % | {format_count(codes)} |")
+    all_count = summary["all_classifications_records"]
+    dewey_count = summary["any_dewey_records"]
+    lines += [f"| **Au moins une classification (toutes sources)** | **{format_count(all_count)}** | **{percent(all_count)} %** | — |",
+        f"| **Au moins une Dewey (Sudoc, BnF ou autorités IdRef)** | **{format_count(dewey_count)}** | **{percent(dewey_count)} %** | — |"]
+    return lines
+
+
+def fisher_two_sided(a, b, c, d):
+    """Probabilité exacte bilatérale pour une table 2 × 2, marges fixées."""
+    first, second, successes = a + b, c + d, a + c
+    total = first + second
+    if total == 0:
+        return 1.0
+
+    def log_choose(n, k):
+        return math.lgamma(n + 1) - math.lgamma(k + 1) - math.lgamma(n - k + 1)
+
+    denominator = log_choose(total, first)
+    def log_probability(x):
+        return log_choose(successes, x) + log_choose(total - successes, first - x) - denominator
+
+    observed = log_probability(a)
+    minimum = max(0, first - (total - successes))
+    maximum = min(first, successes)
+    return min(1.0, sum(math.exp(log_probability(x)) for x in range(minimum, maximum + 1)
+                        if log_probability(x) <= observed + 1e-10))
+
+
+def country_association(documents, french_ppns):
+    """Mesure l'association entre FR en 102$a et la présence d'indices par notice."""
+    outcomes = (
+        ("Dewey Sudoc ou BnF", lambda d: bool(d["sudoc"] or d["bnf"])),
+        ("Via autorités : Dewey IdRef ou domaine Rameau",
+         lambda d: bool(d["idref_dewey"] or d["rameau"])),
+        ("Au moins un indice des deux voies",
+         lambda d: bool(d["sudoc"] or d["bnf"] or d["idref_dewey"] or d["rameau"])),
+    )
+    france_total = len(french_ppns)
+    elsewhere_total = len(documents) - france_total
+    if france_total == 0 or elsewhere_total == 0:
+        raise ValueError("Les deux groupes pays doivent contenir des notices")
+    results = []
+    for name, has_index in outcomes:
+        france_yes = sum(has_index(doc) for ppn, doc in documents.items() if ppn in french_ppns)
+        elsewhere_yes = sum(has_index(doc) for ppn, doc in documents.items() if ppn not in french_ppns)
+        france_rate = france_yes / france_total
+        elsewhere_rate = elsewhere_yes / elsewhere_total
+        results.append(dict(outcome=name, france_yes=france_yes, france_total=france_total,
+            elsewhere_yes=elsewhere_yes, elsewhere_total=elsewhere_total,
+            france_percent=round(100 * france_rate, 2),
+            elsewhere_percent=round(100 * elsewhere_rate, 2),
+            difference_points=round(100 * (france_rate - elsewhere_rate), 2),
+            relative_ratio=round(france_rate / elsewhere_rate, 3) if elsewhere_rate else None,
+            fisher_p=fisher_two_sided(france_yes, france_total - france_yes,
+                                      elsewhere_yes, elsewhere_total - elsewhere_yes)))
+    return results
+
+
 def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
     database, bnf_dir, rameau_dir, output_dir = map(
         lambda p: Path(p).resolve(), (database, bnf_dir, rameau_dir, output_dir))
@@ -159,12 +240,23 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
 
     n = len(documents)
     categories = ("sudoc", "bnf", "idref_dewey", "rameau")
-    coverage = {key: sum(bool(d[key]) for d in documents.values()) for key in categories}
-    all_covered = sum(any(d[k] for k in categories) for d in documents.values())
-    combined_dewey = sum(bool(d["sudoc"] or d["bnf"] or d["idref_dewey"])
-                         for d in documents.values())
+    summary = coverage_summary(documents, categories)
+    french_ppns = {ppn for ppn, doc in bnf_by_ppn.items() if any(
+        country.get("source_field") == "102" and country.get("value") == "FR"
+        for country in doc.get("countries", []))}
+    missing_country = sum(not any(country.get("source_field") == "102" and country.get("value")
+                                  for country in doc.get("countries", []))
+                          for doc in bnf_by_ppn.values())
+    french = coverage_summary({ppn: doc for ppn, doc in documents.items() if ppn in french_ppns}, categories)
+    elsewhere = coverage_summary({ppn: doc for ppn, doc in documents.items() if ppn not in french_ppns}, categories)
+    if french["records"] + elsewhere["records"] != n:
+        raise ValueError("Partition des notices par pays incohérente")
+    associations = country_association(documents, french_ppns)
+    coverage = summary["coverage_records"]
+    all_covered = summary["all_classifications_records"]
+    combined_dewey = summary["any_dewey_records"]
     distribution = Counter(tuple(len(d[k]) for k in categories) for d in documents.values())
-    total_codes = {key: sum(len(d[key]) for d in documents.values()) for key in categories}
+    total_codes = summary["distinct_codes_per_record_totals"]
     comparison = compare_unique_codes(documents)
     multiple = compare_multiple_codes(documents)
 
@@ -177,16 +269,43 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
         "Les codes et occurrences sont dédoublonnés par notice et source. Les domaines Rameau "
         "sont affichés séparément : ce sont des indices de regroupement Rameau et non des Dewey bibliographiques. "
         "Le score global inclut les Dewey de toutes les sources et les domaines Rameau.", "",
-        "## Couverture et volume par source", "",
-        "| Source | Notices avec au moins un code | Couverture du corpus | Codes distincts cumulés par notice |",
-        "|---|---:|---:|---:|"]
+        "## Couverture et volume par source", ""]
     labels = {"sudoc": "Dewey Sudoc", "bnf": "Dewey BnF",
               "idref_dewey": "Dewey des autorités IdRef", "rameau": "Domaines Rameau"}
-    for key in categories:
-        lines.append(f"| {labels[key]} | {coverage[key]:,} | {coverage[key]/n*100:.2f} % | {total_codes[key]:,} |".replace(",", " "))
-    lines += [f"| **Au moins une classification (toutes sources)** | **{all_covered:,}** | **{all_covered/n*100:.2f} %** | — |".replace(",", " "),
-        f"| **Au moins une Dewey (Sudoc, BnF ou autorités IdRef)** | **{combined_dewey:,}** | **{combined_dewey/n*100:.2f} %** | — |".replace(",", " "),
-              "", "## Nombre de codes par notice", "",
+    lines += coverage_table(summary, categories, labels)
+    lines += ["", f"### Documents édités en France : {french['records']} notices", "",
+        "Au moins un code `FR` dans la zone `102$a` classe la notice dans ce groupe, "
+        "même si d'autres codes pays sont présents. Les pourcentages portent sur ce seul groupe.", ""]
+    lines += coverage_table(french, categories, labels, "Couverture du groupe")
+    lines += ["", f"### Documents édités ailleurs ou sans code pays : {elsewhere['records']} notices", "",
+        "Ce groupe comprend les notices sans code `FR` en `102$a`, y compris celles dont la zone "
+        "est absente ou vide. Les pourcentages portent sur ce seul groupe.", ""]
+    lines += coverage_table(elsewhere, categories, labels, "Couverture du groupe")
+    lines += ["", "### Association entre pays `102$a` et présence d'un indice", "",
+        "Chaque notice compte une fois par ligne. Le groupe France contient les notices avec au moins "
+        f"un `FR` en `102$a` ; le second groupe contient toutes les autres, dont {missing_country} sans code pays. "
+        "Un domaine Rameau est ici un indice indirect de regroupement, pas une Dewey bibliographique. "
+        "La dernière ligne compte la présence d'au moins un indice de l'une ou l'autre voie.", "",
+        "| Indice présent | France | Ailleurs ou code absent | Écart France − autres (points) | Rapport des proportions | p (Fisher bilatéral) |",
+        "|---|---:|---:|---:|---:|---:|"]
+    for row in associations:
+        lines.append(f"| {row['outcome']} | {row['france_yes']}/{row['france_total']} "
+            f"({row['france_percent']:.2f} %) | {row['elsewhere_yes']}/{row['elsewhere_total']} "
+            f"({row['elsewhere_percent']:.2f} %) | {row['difference_points']:+.2f} | "
+            f"{row['relative_ratio']:.3f} | {row['fisher_p']:.4g} |")
+    direct, indirect, either = associations
+    lines += ["", f"Dans ce lot, la présence d'une Dewey Sudoc/BnF est proche dans les deux groupes "
+        f"({direct['france_percent']:.2f} % contre {direct['elsewhere_percent']:.2f} %). "
+        f"La présence d'un indice via les autorités est plus faible dans le groupe France "
+        f"({indirect['france_percent']:.2f} % contre {indirect['elsewhere_percent']:.2f} %). "
+        f"Il en va de même pour la présence d'au moins un indice "
+        f"({either['france_percent']:.2f} % contre {either['elsewhere_percent']:.2f} %).", "",
+        "Le test exact de Fisher compare les proportions des deux groupes avec leurs "
+        "effectifs observés. Un p faible signale une association dans ce lot ; il ne démontre pas que "
+        "le pays cause la présence d'un indice. Les trois résultats se recouvrent et cette lecture "
+        "est exploratoire. Le lot est limité et non aléatoire ; le type de document, la langue et "
+        "d'autres différences entre groupes peuvent aussi expliquer les écarts.", ""]
+    lines += ["", "## Nombre de codes par notice", "",
               "Chaque cellule croise le nombre de Dewey distinctes Sudoc, BnF, "
               "IdRef, et de domaines Rameau présents sur une notice. Les zéros sont inclus. "
               "Les codes Rameau du CSV conservent les zéros initiaux (ex. `000`).", "",
@@ -275,6 +394,9 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
         "corpus_id": corpus_id, "records": n, "coverage_records": coverage,
         "all_classifications_records": all_covered,
         "any_bibliographic_dewey_records": combined_dewey,
+        "coverage_by_publication_country": {"france": french, "elsewhere_or_missing": elsewhere},
+        "records_without_publication_country": missing_country,
+        "country_index_association": associations,
         "dewey_rameau_comparison": {key: value for key, value in comparison.items() if key != "details"},
         "dewey_rameau_multiple_comparison": {key: value for key, value in multiple.items() if key != "details"},
         "distinct_codes_per_record_totals": total_codes,

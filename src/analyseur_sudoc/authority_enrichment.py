@@ -208,6 +208,15 @@ def enrich_documents(run_dir, include_rameau):
     (run_dir / "libraries.jsonl").write_bytes(library_bytes)
     report.update(libraries=source_report["libraries"], libraries_sha256=digest(library_bytes))
     write_json(run_dir / "report.json", report)
+    documents_without_606a = sum(not d["idref_606a_links"] for d in docs)
+    documents_with_606a = [d for d in docs if d["idref_606a_links"]]
+    documents_without_rameau = [d for d in documents_with_606a if not any(
+        item["scheme"] == "rameau_domain" and item.get("code")
+        for item in d["idref_606a_classifications"])]
+    without_rameau_all_unresolved = sum(all(
+        link["status"] not in {"resolved", "resolved_former_identifier"}
+        for link in d["idref_606a_links"]) for d in documents_without_rameau)
+    without_rameau_with_resolved = len(documents_without_rameau) - without_rameau_all_unresolved
     lines = ["# Classifications des autorités liées aux 606$a", "",
              f"Notices traitées : {len(docs)} ; autorités distinctes : {len(authorities)}.", "",
              "Toutes les notices sont traitées, même si une Dewey Sudoc ou BnF existe déjà.",
@@ -216,7 +225,14 @@ def enrich_documents(run_dir, include_rameau):
     lines += [f"| {key} | {value} |" for key, value in sorted(counts.items())]
     lines += ["", "## Statut des liens 606$a", "", "| Statut | Occurrences |", "|---|---:|"]
     lines += [f"| {key} | {value} |" for key, value in sorted(statuses.items())]
-    lines += ["", "## Interprétation", "",
+    lines += ["", "## Notices sans domaine de regroupement Rameau", "",
+              f"Sur {len(docs)} notices, **{documents_without_606a}** n'ont aucune indexation dans les zones 606$a suivies.",
+              f"Parmi les {len(documents_with_606a)} notices avec au moins une 606$a, **{len(documents_without_rameau)}** n'ont aucun domaine Rameau 686$a récupéré.",
+              "", "| Situation parmi les notices avec 606$a mais sans domaine Rameau | Notices |", "|---|---:|",
+              f"| Toutes les têtes 606$a sans identifiant d'autorité exploitable | {without_rameau_all_unresolved} |",
+              f"| Au moins une autorité résolue, sans domaine Rameau récupéré | {without_rameau_with_resolved} |", "",
+              "Une autorité résolue sans domaine Rameau peut néanmoins porter une autre classification ou une indexation qui n'est pas analysée ici. Ces résultats ne permettent donc pas de conclure que la notice est dépourvue de toute indexation.",
+              "", "## Interprétation", "",
               "`dewey` désigne les 676$a des autorités. `rameau_domain` désigne les 686$a identifiés par « Note de regroupement par domaine » ; ces codes ne sont pas assimilés à une Dewey bibliographique.",
               "Les autres systèmes (MeSH, etc.) sont ignorés. Aucun classement n'est inventé pour les autorités sans classe ou les têtes sans identifiant.",
               "`classifications` conserve les Dewey Sudoc/BnF intactes. Les nouvelles données sont dans `idref_606a_links` et `idref_606a_classifications` de documents.jsonl.",

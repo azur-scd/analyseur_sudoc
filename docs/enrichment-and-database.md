@@ -72,7 +72,16 @@ déjà enregistrées ne sont pas téléchargées à nouveau.
 ```powershell
 .\.venv\Scripts\python.exe scripts/06_enrich_bnf_idref.py --input-dir data/processed/sudoc/sample-2000/unimarc-v0.3.8 --run-dir data/enrichment/sample-2000/bnf-idref-v0.3.0 --prior-reference data/reference/listrcr/smoke-test
 .\.venv\Scripts\python.exe scripts/07_load_corpus.py --enrichment-dir data/enrichment/sample-2000/bnf-idref-v0.3.0 --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-fuzzy-v1 --year 2025
+.\.venv\Scripts\python.exe scripts/11_corpus_summary.py --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-fuzzy-v1 --bnf-dir data/enrichment/sample-2000/bnf-idref-v0.3.0 --rameau-dir data/enrichment/sample-2000/idref-606a-v0.1.0 --output-dir data/reports/sample-2000-classifications-v1
 ```
+
+Le rapport comprend aussi une comparaison exploratoire Dewey/Rameau : il ne
+retient que les notices ayant exactement un code bibliographique distinct
+(union Sudoc/BnF) et un seul domaine Rameau. Il mesure l'égalité des codes à
+3 chiffres, puis de leurs préfixes à 2 et 1 chiffre. Les autres configurations
+restent hors de cette comparaison initiale. Un même code détaillé présent dans
+Sudoc et BnF ne compte qu'une fois. Le résultat détaillé par notice est exporté
+dans `comparaison-dewey-rameau.csv`.
 
 ## Stockage
 

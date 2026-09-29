@@ -11,6 +11,51 @@ import duckdb
 from analyseur_sudoc.enrichment import digest, read_jsonl
 
 
+def compare_unique_codes(documents):
+    """Compare une Dewey bibliographique unique à un domaine Rameau unique par notice."""
+    selected = []
+    excluded = Counter()
+    for ppn, doc in documents.items():
+        bibliographic = doc["sudoc"] | doc["bnf"]
+        rameau = doc["rameau"]
+        if len(bibliographic) != 1 or len(rameau) != 1:
+            if len(bibliographic) > 1 and len(rameau) > 1:
+                excluded["plusieurs_dewey_et_plusieurs_domaines_rameau"] += 1
+            elif len(bibliographic) > 1:
+                excluded["plusieurs_dewey_sudoc_bnf"] += 1
+            elif len(rameau) > 1:
+                excluded["plusieurs_domaines_rameau"] += 1
+            elif not bibliographic:
+                excluded["sans_dewey_sudoc_bnf"] += 1
+            else:
+                excluded["sans_domaine_rameau"] += 1
+            continue
+        selected.append((ppn, next(iter(bibliographic)), next(iter(rameau))))
+
+    levels = (("Indice détaillé (3 chiffres)", 3), ("Classe (2 chiffres)", 2),
+              ("Domaine (1 chiffre)", 1))
+    results = []
+    detail_rows = []
+    for ppn, dewey_code, rameau_code in selected:
+        row = {"ppn": ppn, "dewey": dewey_code, "rameau": rameau_code}
+        for label, width in levels:
+            dewey_prefix = dewey_code[:width]
+            rameau_prefix = rameau_code[:width]
+            row[f"dewey_{width}"] = dewey_prefix
+            row[f"rameau_{width}"] = rameau_prefix
+            row[f"match_{width}"] = dewey_prefix == rameau_prefix
+        detail_rows.append(row)
+    for label, width in levels:
+        matching = sum(row[f"match_{width}"] for row in detail_rows)
+        different = len(detail_rows) - matching
+        results.append({"level": label, "width": width, "compared": len(detail_rows),
+                        "match": matching, "different": different,
+                        "match_percent": round(100 * matching / len(detail_rows), 2)
+                        if detail_rows else 0})
+    return {"selected_records": len(selected), "excluded_records": dict(excluded),
+            "levels": results, "details": detail_rows}
+
+
 def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
     database, bnf_dir, rameau_dir, output_dir = map(
         lambda p: Path(p).resolve(), (database, bnf_dir, rameau_dir, output_dir))
@@ -71,13 +116,14 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
                 target["idref_dewey"].add(str(item["code"]))
 
     n = len(documents)
-    categories = ("sudoc", "bnf", "rameau", "idref_dewey")
+    categories = ("sudoc", "bnf", "idref_dewey", "rameau")
     coverage = {key: sum(bool(d[key]) for d in documents.values()) for key in categories}
     all_covered = sum(any(d[k] for k in categories) for d in documents.values())
     combined_dewey = sum(bool(d["sudoc"] or d["bnf"] or d["idref_dewey"])
                          for d in documents.values())
     distribution = Counter(tuple(len(d[k]) for k in categories) for d in documents.values())
     total_codes = {key: sum(len(d[key]) for d in documents.values()) for key in categories}
+    comparison = compare_unique_codes(documents)
 
     lines = ["# Synthèse des classifications du corpus", "",
         f"- Corpus DuckDB : `{corpus_id}`",
@@ -105,6 +151,28 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
               "|---:|---:|---:|---:|---:|"]
     for counts, number in sorted(distribution.items()):
         lines.append("| " + " | ".join(map(str, (*counts, number))) + " |")
+    lines += ["", "## Comparaison Dewey bibliographique / domaines Rameau", "",
+        "Cette première comparaison ne retient que les notices avec exactement un code Dewey distinct "
+        "dans l'union Sudoc et BnF, et exactement un code Rameau distinct. Les répétitions identiques "
+        "dans DuckDB sont dédoublonnées par notice avant la sélection. Une notice portant un code Sudoc "
+        "et le même code BnF compte donc comme un seul code bibliographique. Les configurations avec "
+        "plusieurs codes détaillés dans l'un des groupes sont écartées à ce stade, même si elles pourraient "
+        "converger après réduction en classe ou domaine ; ces cas seront analysés séparément.", "",
+        "| Niveau comparé | Notices comparées | Codes identiques | Codes différents | Identiques (%) |",
+        "|---|---:|---:|---:|---:|"]
+    for result in comparison["levels"]:
+        lines.append(f"| {result['level']} | {result['compared']} | {result['match']} | "
+                     f"{result['different']} | {result['match_percent']:.2f} % |")
+    lines += ["", f"Notices retenues : **{comparison['selected_records']}** sur {n}.", "",
+        "Les niveaux sont calculés en prenant les préfixes des codes : 3 chiffres, puis 2, puis 1. "
+        "Chaque notice n'est comptée qu'une fois à chaque niveau. Les codes Rameau étant des domaines "
+        "généralement à trois chiffres, la comparaison détaillée reste littérale ; les niveaux classe "
+        "et domaine comparent respectivement les deux premiers et le premier chiffre.", "",
+        "Configurations écartées :", "",
+        "| Motif | Notices |", "|---|---:|"]
+    lines += [f"| {key} | {value} |" for key, value in sorted(comparison["excluded_records"].items())]
+    lines += ["", "Le fichier `comparaison-dewey-rameau.csv` contient les codes et les résultats "
+              "par notice aux trois niveaux.", ""]
     lines += ["", "## Détail par notice", "",
               "Le CSV associé donne pour chaque PPN les codes distincts de chaque source.", ""]
     (output_dir / "rapport.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -118,10 +186,21 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
                 len(d["bnf"]), " | ".join(sorted(d["bnf"])), len(d["idref_dewey"]),
                 " | ".join(sorted(d["idref_dewey"])), len(d["rameau"]),
                 " | ".join(sorted(d["rameau"]))])
+    with (output_dir / "comparaison-dewey-rameau.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.writer(stream, delimiter=";")
+        writer.writerow(["ppn", "dewey_sudoc_bnf", "domaine_rameau",
+            "dewey_3_chiffres", "rameau_3_chiffres", "identique_3_chiffres",
+            "dewey_classe_2", "rameau_classe_2", "identique_classe_2",
+            "dewey_domaine_1", "rameau_domaine_1", "identique_domaine_1"])
+        for row in comparison["details"]:
+            writer.writerow([row["ppn"], row["dewey"], row["rameau"], row["dewey_3"],
+                row["rameau_3"], row["match_3"], row["dewey_2"], row["rameau_2"],
+                row["match_2"], row["dewey_1"], row["rameau_1"], row["match_1"]])
     (output_dir / "statistics.json").write_text(json.dumps({
         "corpus_id": corpus_id, "records": n, "coverage_records": coverage,
         "all_classifications_records": all_covered,
         "any_bibliographic_dewey_records": combined_dewey,
+        "dewey_rameau_comparison": {key: value for key, value in comparison.items() if key != "details"},
         "distinct_codes_per_record_totals": total_codes,
         "distribution": [{"sudoc": a, "bnf": b, "idref_dewey": c,
             "rameau": d, "records": count} for (a,b,c,d), count in sorted(distribution.items())],
@@ -129,7 +208,8 @@ def build_report(database, corpus_id, bnf_dir, rameau_dir, output_dir):
             "rameau_report": str(rameau_dir / "report.json")}},
         ensure_ascii=False, indent=2), encoding="utf-8")
     return {"records": n, "all_classifications_records": all_covered,
-            "coverage_records": coverage, "output_dir": str(output_dir)}
+            "coverage_records": coverage, "comparison_records": comparison["selected_records"],
+            "comparison_levels": comparison["levels"], "output_dir": str(output_dir)}
 
 
 if __name__ == "__main__":

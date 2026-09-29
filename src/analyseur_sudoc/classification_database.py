@@ -1,5 +1,9 @@
 """Schéma partagé et migration des classifications de notices et d'autorités."""
 
+import json
+
+from analyseur_sudoc.unimarc import clean, dewey
+
 
 CLASSIFICATION_SCHEMA = """(
     corpus_id VARCHAR NOT NULL,
@@ -15,15 +19,13 @@ CLASSIFICATION_SCHEMA = """(
     payload JSON,
     run_id VARCHAR NOT NULL DEFAULT '',
     scheme VARCHAR,
-    code_raw VARCHAR,
-    code VARCHAR,
     requested_authority_ppn VARCHAR,
     resolved_authority_ppn VARCHAR,
     PRIMARY KEY(corpus_id, ppn, source, run_id, occurrence)
 )"""
 
 REQUIRED_COLUMNS = {
-    "run_id", "scheme", "code_raw", "code",
+    "run_id", "scheme",
     "requested_authority_ppn", "resolved_authority_ppn",
 }
 
@@ -40,7 +42,8 @@ def ensure_classification_schema(con):
         if "AUTHORITY_CLASSIFICATION" in tables:
             _merge_legacy_authorities(con)
         return
-    if REQUIRED_COLUMNS.issubset(_columns(con, "CLASSIFICATION")):
+    columns = _columns(con, "CLASSIFICATION")
+    if REQUIRED_COLUMNS.issubset(columns) and not {"code_raw", "code"}.intersection(columns):
         if "AUTHORITY_CLASSIFICATION" in tables:
             _merge_legacy_authorities(con)
         return
@@ -48,16 +51,14 @@ def ensure_classification_schema(con):
     old_columns = _columns(con, "CLASSIFICATION")
     if not {"corpus_id", "ppn", "occurrence", "source", "payload"}.issubset(old_columns):
         raise ValueError("Schéma CLASSIFICATION inconnu ; migration refusée")
+    old_rows = con.execute("SELECT * FROM CLASSIFICATION").fetchall()
+    old_names = [item[0] for item in con.description]
     profile_existed = "LIBRARY_PROFILE" in tables
     con.execute("DROP VIEW IF EXISTS LIBRARY_PROFILE")
     con.execute("DROP TABLE IF EXISTS CLASSIFICATION_MERGED")
     con.execute(f"CREATE TABLE CLASSIFICATION_MERGED {CLASSIFICATION_SCHEMA}")
-    con.execute("""INSERT INTO CLASSIFICATION_MERGED
-        (corpus_id,ppn,occurrence,dewey_raw,dewey_normalized,dewey_1,dewey_2,dewey_3,
-         source,annotation,payload,run_id,scheme,code_raw,code,requested_authority_ppn,resolved_authority_ppn)
-        SELECT corpus_id,ppn,occurrence,dewey_raw,dewey_normalized,dewey_1,dewey_2,dewey_3,
-               coalesce(source,'sudoc:676$a'),annotation,payload,'','dewey',dewey_raw,dewey_normalized,NULL,NULL
-        FROM CLASSIFICATION""")
+    rows = [_migrate_row(dict(zip(old_names, row))) for row in old_rows]
+    _insert_rows(con, "CLASSIFICATION_MERGED", rows)
     con.execute("DROP TABLE CLASSIFICATION")
     con.execute("ALTER TABLE CLASSIFICATION_MERGED RENAME TO CLASSIFICATION")
     if "AUTHORITY_CLASSIFICATION" in tables:
@@ -72,23 +73,44 @@ def _merge_legacy_authorities(con):
         return
     if "AUTHORITY_RUN" not in tables:
         raise ValueError("AUTHORITY_CLASSIFICATION existe sans AUTHORITY_RUN")
-    con.execute("""INSERT INTO CLASSIFICATION
-        (corpus_id,ppn,occurrence,dewey_raw,dewey_normalized,dewey_1,dewey_2,dewey_3,
-         source,annotation,payload,run_id,scheme,code_raw,code,requested_authority_ppn,resolved_authority_ppn)
-        SELECT r.corpus_id,a.ppn,a.occurrence,
-               CASE WHEN a.scheme='dewey' THEN a.code_raw END,
-               CASE WHEN a.scheme='dewey' AND regexp_full_match(a.code,'[0-9]{3}(\\.[0-9]+)?') THEN a.code END,
-               CASE WHEN a.scheme='dewey' AND regexp_full_match(a.code,'[0-9]{3}(\\.[0-9]+)?') THEN substr(a.code,1,1) END,
-               CASE WHEN a.scheme='dewey' AND regexp_full_match(a.code,'[0-9]{3}(\\.[0-9]+)?') THEN substr(a.code,1,2) END,
-               CASE WHEN a.scheme='dewey' AND regexp_full_match(a.code,'[0-9]{3}(\\.[0-9]+)?') THEN substr(a.code,1,3) END,
-               a.source,NULL,a.payload,a.run_id,a.scheme,a.code_raw,a.code,
-               a.requested_authority_ppn,a.resolved_authority_ppn
-        FROM AUTHORITY_CLASSIFICATION a JOIN AUTHORITY_RUN r USING(run_id)
-        WHERE NOT EXISTS (
-          SELECT 1 FROM CLASSIFICATION c WHERE c.corpus_id=r.corpus_id AND c.ppn=a.ppn
-            AND c.source=a.source AND c.run_id=a.run_id AND c.occurrence=a.occurrence
-        )""")
+    raw_rows = con.execute("""SELECT r.corpus_id,a.ppn,a.occurrence,a.source,a.payload,
+            a.run_id,a.scheme,a.code_raw,a.code,a.requested_authority_ppn,a.resolved_authority_ppn
+        FROM AUTHORITY_CLASSIFICATION a JOIN AUTHORITY_RUN r USING(run_id)""").fetchall()
+    names = [item[0] for item in con.description]
+    existing = {(r[0], r[1], r[2], r[3], r[4]) for r in con.execute(
+        "SELECT corpus_id,ppn,occurrence,source,run_id FROM CLASSIFICATION").fetchall()}
+    rows = []
+    for values in raw_rows:
+        row = dict(zip(names, values))
+        key = (row["corpus_id"], row["ppn"], row["occurrence"], row["source"], row["run_id"])
+        if key not in existing:
+            rows.append(_migrate_row(row))
+    _insert_rows(con, "CLASSIFICATION", rows)
     con.execute("DROP TABLE AUTHORITY_CLASSIFICATION")
+
+
+def _migrate_row(row):
+    scheme = row.get("scheme") or "dewey"
+    dewey_raw = row.get("dewey_raw") or row.get("code_raw")
+    if scheme == "rameau_domain":
+        dewey_raw = row.get("code_raw") or dewey_raw
+        normalized = dewey({"raw": dewey_raw or "", "value": clean(dewey_raw or "")})
+        dewey_normalized = normalized["dewey_normalized"]
+        parts = [normalized["dewey_1"], normalized["dewey_2"], normalized["dewey_3"]]
+    else:
+        dewey_normalized = row.get("dewey_normalized") or row.get("code")
+        parts = [row.get(f"dewey_{n}") for n in (1, 2, 3)]
+        if dewey_normalized:
+            parts = [dewey_normalized[:1], dewey_normalized[:2], dewey_normalized[:3]]
+    return (row["corpus_id"], row["ppn"], row["occurrence"], dewey_raw,
+            dewey_normalized, *parts, row.get("source") or "sudoc:676$a",
+            row.get("annotation"), row.get("payload"), row.get("run_id") or "",
+            scheme, row.get("requested_authority_ppn"), row.get("resolved_authority_ppn"))
+
+
+def _insert_rows(con, table, rows):
+    if rows:
+        con.executemany(f"INSERT INTO {table} VALUES ({','.join('?' for _ in rows[0])})", rows)
 
 
 def _create_library_profile(con):

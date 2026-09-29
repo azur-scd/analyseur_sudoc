@@ -99,14 +99,13 @@ def load_corpus(enrichment_dir, database, corpus_id, year):
                 con.executemany("INSERT INTO HOLDING VALUES (?,?,?,?)", holdings)
             classifications = [(corpus_id, d["ppn"], i, v["dewey_raw"], v["dewey_normalized"],
                                 v["dewey_1"], v["dewey_2"], v["dewey_3"], v.get("dewey_source", "sudoc:676$a"),
-                                v.get("dewey_annotation"), json.dumps(v, ensure_ascii=False), "", "dewey",
-                                v["dewey_raw"], v["dewey_normalized"], None, None)
+                                v.get("dewey_annotation"), json.dumps(v, ensure_ascii=False), "", "dewey", None, None)
                                for d in documents for i, v in enumerate(d["classifications"], 1)]
             if classifications:
                 con.executemany("""INSERT INTO CLASSIFICATION
                     (corpus_id,ppn,occurrence,dewey_raw,dewey_normalized,dewey_1,dewey_2,dewey_3,
-                     source,annotation,payload,run_id,scheme,code_raw,code,requested_authority_ppn,resolved_authority_ppn)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", classifications)
+                     source,annotation,payload,run_id,scheme,requested_authority_ppn,resolved_authority_ppn)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", classifications)
             occurrences = [(corpus_id, d["ppn"], key, i, json.dumps(v, ensure_ascii=False))
                            for d in documents for key in FIELD_LISTS for i, v in enumerate(d.get(key, []), 1)]
             if occurrences:

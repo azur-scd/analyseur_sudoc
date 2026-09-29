@@ -349,7 +349,9 @@ Cette table matérialise le graphe fondamental : `DOCUMENT ↔ LIBRARY` (via
 
 Portée : occurrences de classification rattachées à un document, un corpus et,
 pour les enrichissements d'autorités, une exécution. Cette table contient les
-Dewey Sudoc/BnF, les Dewey d'autorités IdRef et les domaines Rameau.
+Dewey Sudoc/BnF, les Dewey d'autorités IdRef et les domaines Rameau, normalisés
+avec le même traitement. Le champ `scheme` distingue notamment `dewey` et
+`rameau_domain`.
 
 | Colonne | Type DuckDB | Contraintes |
 |---|---|---|
@@ -366,15 +368,15 @@ Dewey Sudoc/BnF, les Dewey d'autorités IdRef et les domaines Rameau.
 | payload | JSON |  |
 | run_id | VARCHAR | PK (composite), vide pour les classifications bibliographiques |
 | scheme | VARCHAR | `dewey` pour les Dewey ; `rameau_domain` pour les domaines Rameau |
-| code_raw | VARCHAR | Code de classification brut |
-| code | VARCHAR | Code générique normalisé/conservé |
 | requested_authority_ppn | VARCHAR | PPN d'autorité demandé, le cas échéant |
 | resolved_authority_ppn | VARCHAR | PPN d'autorité résolu, le cas échéant |
 
 La clé primaire est `(corpus_id, ppn, source, run_id, occurrence)` afin de
-préserver les classifications répétées de chaque source et exécution. Les
-colonnes `dewey_*` restent nulles pour les domaines Rameau ; utiliser `scheme`
-et `code` pour interroger tous les systèmes sans interpréter Rameau comme Dewey.
+préserver les classifications répétées de chaque source et exécution. Les codes
+bruts de tous les systèmes sont conservés dans `dewey_raw`, et leurs valeurs
+normalisées dans `dewey_normalized` et `dewey_1/2/3`. Le cadre officiel des
+domaines Rameau pour 2026 est conservé dans
+[`resources/rameau_domains_2026.csv`](../resources/rameau_domains_2026.csv).
 
 #### DOCUMENT_FIELD
 

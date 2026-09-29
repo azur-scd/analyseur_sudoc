@@ -73,6 +73,7 @@ ici comme déjà implémentés.
 - [Normalisation Dewey et préparation de l'enrichissement BnF](docs/dewey-enrichment.md)
 - [Enrichissement BnF / IdRef et chargement DuckDB](docs/enrichment-and-database.md)
 - [Classifications IdRef via les seules têtes 606$a](docs/idref-subject-classifications.md)
+- [Référentiel des domaines Rameau 2026](docs/rameau-domains-2026.md)
 - [Contrats documentaires des sorties](docs/output-contracts.md)
 - [Parcours de reproduction](docs/reproduction.md)
 

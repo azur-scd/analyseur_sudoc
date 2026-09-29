@@ -1,7 +1,6 @@
 """Chargement des classifications d'autorités dans CLASSIFICATION."""
 
 import json
-import re
 from pathlib import Path
 
 import duckdb
@@ -9,6 +8,7 @@ import duckdb
 from analyseur_sudoc.enrichment import digest, read_jsonl
 from analyseur_sudoc.classification_database import ensure_classification_schema
 from analyseur_sudoc.sudoc import now
+from analyseur_sudoc.unimarc import clean, dewey
 
 
 def insert_batch(con, table, rows):
@@ -69,23 +69,22 @@ def load_authority_enrichment(directory, database, corpus_id, run_id):
             classes = []
             for d in documents:
                 for i, item in enumerate(d["idref_606a_classifications"], 1):
-                    code = item["code"]
-                    is_dewey = item["scheme"] == "dewey" and bool(
-                        code and re.fullmatch(r"[0-9]{3}(?:\.[0-9]+)?", code))
+                    normalized = item.get("normalization") or {}
+                    if not normalized:
+                        normalized = dewey(dict(raw=item["code_raw"], value=clean(item["code_raw"])))
                     classes.append((corpus_id, d["ppn"], i,
-                                    item["code_raw"] if item["scheme"] == "dewey" else None,
-                                    code if is_dewey else None,
-                                    code[:1] if is_dewey else None,
-                                    code[:2] if is_dewey else None,
-                                    code[:3] if is_dewey else None,
+                                    normalized.get("dewey_raw", item["code_raw"]),
+                                    normalized.get("dewey_normalized"),
+                                    normalized.get("dewey_1"), normalized.get("dewey_2"),
+                                    normalized.get("dewey_3"),
                                     item["source"], None, json.dumps(item, ensure_ascii=False), run_id,
-                                    item["scheme"], item["code_raw"], code,
+                                    item["scheme"],
                                     item["via_606a"]["authority_ppn"], item["authority_ppn"]))
             if classes:
                 con.executemany("""INSERT INTO CLASSIFICATION
                     (corpus_id,ppn,occurrence,dewey_raw,dewey_normalized,dewey_1,dewey_2,dewey_3,
-                     source,annotation,payload,run_id,scheme,code_raw,code,requested_authority_ppn,resolved_authority_ppn)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", classes)
+                     source,annotation,payload,run_id,scheme,requested_authority_ppn,resolved_authority_ppn)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", classes)
             counts = {table: con.execute(f"SELECT count(*) FROM {table} WHERE run_id=?", [run_id]).fetchone()[0]
                       for table in ["AUTHORITY_DOCUMENT", "AUTHORITY_HEADING"]}
             counts["CLASSIFICATION"] = con.execute(

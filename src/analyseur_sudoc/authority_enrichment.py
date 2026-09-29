@@ -12,7 +12,7 @@ from analyseur_sudoc.enrichment import cached_fetch, digest, read_jsonl, write_j
 from analyseur_sudoc.sudoc import now, write_json
 from analyseur_sudoc.unimarc import children, clean, dewey
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 PPN = re.compile(r"[0-9]{8}[0-9X]")
 
 
@@ -74,9 +74,9 @@ def parse_authority(raw, requested_ppn, include_rameau):
         for sub in subs:
             if sub["code"] != "a":
                 continue
-            normalized = dewey(dict(raw=sub["raw"], value=clean(sub["raw"]))) if scheme == "dewey" else None
-            # Un domaine n'est ni une Dewey de document, ni un indice à développer.
-            code = normalized["dewey_normalized"] if normalized else clean(sub["raw"])
+            normalized = dewey(dict(raw=sub["raw"], value=clean(sub["raw"])))
+            normalized["dewey_source"] = f"idref:authority:{tag}$a"
+            code = normalized["dewey_normalized"]
             classifications.append(dict(scheme=scheme, code_raw=sub["raw"], code=code,
                 source=f"idref:authority:{tag}$a", source_field=tag, field_index=index,
                 occurrence=occurrences[tag], subfield_index=sub["subfield_index"],

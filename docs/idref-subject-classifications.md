@@ -24,9 +24,11 @@ distincts.
   Les sous-zones, notamment l'édition $v, et la normalisation restent tracées.
 - Avec `--include-rameau`, **686$a** uniquement si le $2 est
   **Note de regroupement par domaine** : `scheme=rameau_domain`.
-  C'est le cadre de classement Rameau, distinct de la Dewey bibliographique.
-  Le code est conservé tel quel, avec ses termes explicatifs $c et les autres
-  sous-zones. Il n'est pas converti ni développé en une classe plus précise.
+  Les codes de domaine correspondent au cadre officiel Rameau 2026, conservé
+  dans `resources/rameau_domains_2026.csv`. Ils passent par le même normaliseur
+  que les Dewey et remplissent `dewey_raw` et `dewey_normalized` ; `scheme`
+  préserve leur origine Rameau. Les termes $c et autres sous-zones restent dans
+  les détails source. Aucun code n'est développé en une classe plus précise.
 - Les autres classifications 686 (MeSH, CAS/ENZ, corpus internes, etc.) sont
   ignorées. Aucun lien vers une autorité associée, plus large ou plus étroite
   n'est suivi pour récupérer d'autres classifications.
@@ -60,6 +62,9 @@ Une notice sans 606$a a deux listes vides. Les Dewey existantes restent dans
 Les exports `authority-results.jsonl` (par autorité) et
 `authority-classifications.jsonl` (par occurrence liée à un document), le
 rapport JSON et `rapport.md` facilitent les contrôles.
+Dans ces exports de provenance, les champs source `code_raw` et `code` restent
+présents ; dans la table DuckDB fusionnée, le code brut et le code normalisé
+utilisent respectivement les colonnes `dewey_raw` et `dewey_normalized`.
 
 ## Exécution et reprise
 
@@ -95,17 +100,18 @@ est déjà chargé.
 
 ```sql
 -- Classes distinctes par notice et par méthode IdRef.
-SELECT DISTINCT ppn, scheme, code, requested_authority_ppn, resolved_authority_ppn
+SELECT DISTINCT ppn, scheme, dewey_raw, dewey_normalized,
+       requested_authority_ppn, resolved_authority_ppn
 FROM CLASSIFICATION
-WHERE run_id = 'idref-606a-v1' AND code IS NOT NULL;
+WHERE run_id = 'idref-606a-v1' AND dewey_normalized IS NOT NULL;
 
 -- Comparer sans mélanger les méthodes : sudoc:676$a, bnf:676$a,
 -- idref:dewey, idref:rameau_domain.
-SELECT DISTINCT ppn, source, scheme, code
+SELECT DISTINCT ppn, source, scheme, dewey_normalized
 FROM CLASSIFICATION
 WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1'
   AND run_id IN ('', 'idref-606a-v1')
-  AND code IS NOT NULL;
+  AND dewey_normalized IS NOT NULL;
 ```
 
 Les anciennes bases se migrent avec `scripts/10_merge_classifications.py` ; le

@@ -183,18 +183,19 @@ SELECT ppn, occurrence, value FROM SUMMARY;
 
 ```sql
 -- Classes distinctes par notice et par méthode IdRef.
-SELECT DISTINCT ppn, scheme, code, requested_authority_ppn, resolved_authority_ppn
+SELECT DISTINCT ppn, scheme, dewey_raw, dewey_normalized,
+       requested_authority_ppn, resolved_authority_ppn
 FROM CLASSIFICATION
 WHERE run_id = 'idref-606a-v1'
   AND corpus_id = 'sample-2000-2025-bnf-idref-v1'
-  AND code IS NOT NULL;
+  AND dewey_normalized IS NOT NULL;
 ```
 
 ```sql
 -- Comparer sans mélanger les méthodes : sudoc:676$a, bnf:676$a,
 -- idref:dewey, idref:rameau_domain.
-SELECT DISTINCT ppn, source, scheme, code
+SELECT DISTINCT ppn, source, scheme, dewey_normalized
 FROM CLASSIFICATION
 WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1'
-  AND code IS NOT NULL;
+  AND dewey_normalized IS NOT NULL;
 ```

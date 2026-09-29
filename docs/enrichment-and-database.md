@@ -138,9 +138,10 @@ SELECT ppn, dewey_raw, dewey_normalized
 FROM CLASSIFICATION WHERE source = 'bnf:676$a';
 
 -- Classifications IdRef et domaines Rameau, avec provenance de l'autorité.
-SELECT ppn, run_id, scheme, code, requested_authority_ppn, resolved_authority_ppn
+SELECT ppn, run_id, scheme, dewey_raw, dewey_normalized,
+       requested_authority_ppn, resolved_authority_ppn
 FROM CLASSIFICATION
-WHERE run_id = 'idref-606a-v1' AND code IS NOT NULL;
+WHERE run_id = 'idref-606a-v1' AND dewey_normalized IS NOT NULL;
 
 -- Notices et noms des bibliothèques possédantes pour le lot livré.
 SELECT d.ppn, d.title, l.rcr, l.label, l.iln, l.library_type

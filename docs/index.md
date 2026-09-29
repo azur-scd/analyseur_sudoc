@@ -18,6 +18,7 @@ l'évolution documentaire du dépôt.
 - [Normalisation Dewey et préparation de l'enrichissement BnF](dewey-enrichment.md)
 - [Enrichissement BnF / IdRef et chargement DuckDB](enrichment-and-database.md)
 - [Classifications IdRef via les seules têtes de vedettes 606$a](idref-subject-classifications.md)
+- [Référentiel des domaines Rameau 2026](rameau-domains-2026.md)
 - [Contrats documentaires des sorties](output-contracts.md)
 - [Parcours de reproduction](reproduction.md)
 

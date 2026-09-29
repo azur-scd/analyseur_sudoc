@@ -64,6 +64,7 @@ mais non listé ici comme contrat de nommage stable.
 | Fichier | Rôle | Identifiant principal | Statut / provenance documentés | Conservation |
 |---|---|---|---|---|
 | `database-report.json` | Rapport JSON du chargement dans DuckDB. | Couple de lot chargé (`corpus_id` ou `run_id`) et dossier d'enrichissement | Le chargement est documenté comme transactionnel, avec contrôles d'empreintes, d'effectifs, d'identité de lot et de relations PPN/RCR. | Écrit dans le dossier d'enrichissement du chargement ; permet de tracer un chargement sans modifier la documentation du lot source. |
+| `rapport.md`, `statistics.json`, `dewey-par-notice.csv` | Synthèse de couverture Dewey Sudoc, BnF, IdRef et domaines Rameau, avec scores globaux et distribution par notice. | Corpus DuckDB et exports BnF/IdRef correspondant au même ensemble de PPN | Les couvertures comptent les notices distinctes avec au moins un code normalisé ; le CSV liste les codes distincts par source et par PPN. | Produit par `scripts/11_corpus_summary.py` sous `data/reports/`. |
 
 ## 6. Règles transversales de conservation
 

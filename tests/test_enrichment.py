@@ -8,9 +8,9 @@ import httpx
 from lxml import etree
 
 from analyseur_sudoc.database import FIELDS
-from analyseur_sudoc.enrichment import ark_from_url, bnf_identifiers, cached_fetch, digest, parse_bnf, write_jsonl
+from analyseur_sudoc.enrichment import ark_from_url, bnf_identifiers, cached_fetch, digest, parse_bnf, preferred_bnf_search, write_jsonl
 from analyseur_sudoc.unimarc import parse_record
-from analyseur_sudoc.warehouse import load_corpus
+from analyseur_sudoc.warehouse import enrichment_is_loadable, load_corpus
 
 
 class BnfTests(unittest.TestCase):
@@ -53,6 +53,12 @@ class BnfTests(unittest.TestCase):
             {"source_field": "010", "subfields": [{"code": "a", "raw": "invalid"}]}]}
         self.assertEqual(bnf_identifiers(document),
                          [("isbn", "9782123456789"), ("ean", "9782123456789")])
+        document["bnf_links"] = []
+        self.assertEqual(preferred_bnf_search(document), ("ean", "9782123456789"))
+        document["source_fields"] = document["source_fields"][:1]
+        self.assertEqual(preferred_bnf_search(document), ("isbn", "9782123456789"))
+        document["bnf_links"] = [{"url": "https://catalogue.bnf.fr/ark:/12148/cb487118969"}]
+        self.assertEqual(preferred_bnf_search(document)[0], "ark")
 
     def test_cached_response_and_tamper_detection(self):
         calls = []
@@ -68,8 +74,29 @@ class BnfTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 cached_fetch(client, "https://example.org/", path, 0)
 
+    def test_sru_diagnostic_is_refetched(self):
+        responses = [b"<srw:diagnostics>error</srw:diagnostics>", self.response()]
+        def handler(request):
+            return httpx.Response(200, content=responses.pop(0))
+        with tempfile.TemporaryDirectory() as temp, httpx.Client(transport=httpx.MockTransport(handler)) as client:
+            path = Path(temp) / "bnf.xml"
+            self.assertIn(b"diagnostics", cached_fetch(client, "https://example.org/", path, 0)[0])
+            self.assertEqual(parse_bnf(cached_fetch(client, "https://example.org/", path, 0)[0])["status"], "matched")
+            self.assertEqual(len(responses), 0)
+
 
 class WarehouseTests(unittest.TestCase):
+    def test_marginal_bnf_errors_only_are_loadable(self):
+        manifest = {"policy": "one_bnf_query_per_document_ark_else_ean_else_isbn_fuzzy"}
+        report = {"status": "partial", "bnf_candidates": 100,
+                  "bnf": [{"ppn": f"{i:09d}"} for i in range(99)],
+                  "errors": [{"service": "bnf", "ppn": "000000099"}]}
+        self.assertTrue(enrichment_is_loadable(report, manifest))
+        self.assertFalse(enrichment_is_loadable(report, {"policy": "other"}))
+        self.assertFalse(enrichment_is_loadable({**report, "errors": [{"service": "idref", "ppn": "000000099"}]}, manifest))
+        self.assertFalse(enrichment_is_loadable({**report, "bnf": report["bnf"][:-1]}, manifest))
+        self.assertFalse(enrichment_is_loadable({**report, "bnf_candidates": 99}, manifest))
+
     def test_roundtrip_idempotence_and_corpus_isolation(self):
         record = etree.fromstring(b'''<record><controlfield tag="001">000000001</controlfield>
           <datafield tag="200"><subfield code="a">Title</subfield></datafield>

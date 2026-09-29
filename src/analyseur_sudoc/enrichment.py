@@ -3,6 +3,7 @@
 import hashlib
 import json
 import re
+import time
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -28,6 +29,17 @@ def write_jsonl(path, rows):
     with Path(path).open("w", encoding="utf-8", newline="\n") as stream:
         for row in rows:
             stream.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def write_report(path, report):
+    for attempt in range(5):
+        try:
+            write_json(path, report)
+            return
+        except PermissionError:
+            if attempt == 4:
+                raise
+            time.sleep(0.2 * (attempt + 1))
 
 
 def ark_from_url(url):
@@ -96,6 +108,18 @@ def bnf_identifiers(document):
     return found
 
 
+def preferred_bnf_search(document):
+    """Une seule recherche par notice : ARK, sinon EAN, sinon ISBN."""
+    if document["bnf_links"]:
+        return "ark", sorted({v["url"] for v in document["bnf_links"]})[0]
+    identifiers = bnf_identifiers(document)
+    for kind in ("ean", "isbn"):
+        for candidate_kind, value in identifiers:
+            if candidate_kind == kind:
+                return kind, value
+    return None
+
+
 def cached_fetch(client, url, path, delay):
     meta_path = path.with_suffix(path.suffix + ".meta.json")
     if path.exists() and meta_path.exists():
@@ -103,7 +127,9 @@ def cached_fetch(client, url, path, delay):
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         if meta["url"] != str(url) or meta["sha256"] != digest(raw):
             raise ValueError(f"Cache modifié : {path}")
-        return raw, meta
+        # Un diagnostic SRU est une réponse d'erreur transitoire, pas une notice à réutiliser.
+        if path.suffix != ".xml" or not (b"<srw:diagnostics>" in raw or b"<diagnostics>" in raw):
+            return raw, meta
     raw = fetch(client, url, delay=delay)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(raw)
@@ -123,8 +149,8 @@ def enrich(input_dir, run_dir, client, prior_reference=None, delay=0.3):
     extraction = json.loads((input_dir / "report.json").read_text(encoding="utf-8"))
     if extraction["status"] != "complete" or extraction["counts"]["documents"] != len(documents):
         raise ValueError("Extraction invalide ou incomplète")
-    manifest = dict(version="0.2.0", input_dir=str(input_dir), documents_sha256=digest(payload),
-                    policy="bnf_links_then_unique_isbn_ean_missing_usable_dewey", delay_seconds=delay)
+    manifest = dict(version="0.3.0", input_dir=str(input_dir), documents_sha256=digest(payload),
+                    policy="one_bnf_query_per_document_ark_else_ean_else_isbn_fuzzy", delay_seconds=delay)
     run_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = run_dir / "manifest.json"
     if manifest_path.exists() and json.loads(manifest_path.read_text(encoding="utf-8")) != manifest:
@@ -132,52 +158,39 @@ def enrich(input_dir, run_dir, client, prior_reference=None, delay=0.3):
     write_json(manifest_path, manifest)
     report = dict(started_at=now(), status="running", errors=[], bnf=[], rcr_warnings=[])
     report_path = run_dir / "report.json"
-    write_json(report_path, report)
+    write_report(report_path, report)
     candidates = [d for d in documents if not any(v["dewey_normalized"] for v in d["classifications"])
                   and (d["bnf_links"] or bnf_identifiers(d))]
     for d in candidates:
-        for url in sorted({v["url"] for v in d["bnf_links"]}):
-            try:
-                ark = ark_from_url(url)
+        kind, identifier = preferred_bnf_search(d)
+        try:
+            if kind == "ark":
+                ark = ark_from_url(identifier)
                 request = httpx.Request("GET", "https://catalogue.bnf.fr/api/SRU", params={
                     "version": "1.2", "operation": "searchRetrieve", "query": f'bib.persistentid any "{ark}"',
                     "recordSchema": "unimarcXchange", "maximumRecords": 2, "startRecord": 1})
-                raw, meta = cached_fetch(client, request.url, run_dir / "bnf" / (ark.rsplit("/", 1)[-1] + ".xml"), delay)
-                result = parse_bnf(raw, ark)
-                for item in result["classifications"]:
-                    item["enrichment_source"] = meta
-                    d["classifications"].append(item)
-                report["bnf"].append(dict(ppn=d["ppn"], requested_url=url, **result))
-                print(f"BnF {d['ppn']} : {result['status']}, {len(result['classifications'])} Dewey", flush=True)
-            except (httpx.HTTPError, ValueError, etree.XMLSyntaxError, TypeError) as exc:
-                report["errors"].append(dict(service="bnf", ppn=d["ppn"], url=url, error=str(exc)))
-            write_json(report_path, report)
-        if not any(v["dewey_normalized"] for v in d["classifications"]):
-            for kind, identifier in bnf_identifiers(d):
-                try:
-                    request = httpx.Request("GET", "https://catalogue.bnf.fr/api/SRU", params={
-                        "version": "1.2", "operation": "searchRetrieve",
-                        "query": f'bib.{kind} adj "{identifier}"',
-                        "recordSchema": "unimarcXchange", "maximumRecords": 2, "startRecord": 1})
-                    raw, meta = cached_fetch(client, request.url,
-                                             run_dir / "bnf" / f"{kind}-{identifier}.xml", delay)
-                    result = parse_bnf(raw)
-                    report["bnf"].append(dict(ppn=d["ppn"], search_field=kind,
-                                              searched_identifier=identifier, **result))
-                    if result["status"] == "multiple_matches":
-                        break
-                    for item in result["classifications"]:
-                        item["enrichment_source"] = meta
-                        item["bnf_match_method"] = kind
-                        item["bnf_match_identifier"] = identifier
-                        item["bnf_ark"] = result["returned_id"]
-                        d["classifications"].append(item)
-                    if result["status"] == "matched":
-                        break
-                except (httpx.HTTPError, ValueError, etree.XMLSyntaxError, TypeError) as exc:
-                    report["errors"].append(dict(service="bnf", ppn=d["ppn"], search_field=kind,
-                                                 searched_identifier=identifier, error=str(exc)))
-                write_json(report_path, report)
+                cache_name = ark.rsplit("/", 1)[-1]
+            else:
+                request = httpx.Request("GET", "https://catalogue.bnf.fr/api/SRU", params={
+                    "version": "1.2", "operation": "searchRetrieve",
+                    "query": f'bib.fuzzyISBN any "{identifier}"',
+                    "recordSchema": "unimarcXchange", "maximumRecords": 2, "startRecord": 1})
+                cache_name = f"fuzzy-{kind}-{identifier}"
+            raw, meta = cached_fetch(client, request.url, run_dir / "bnf" / f"{cache_name}.xml", delay)
+            result = parse_bnf(raw, ark if kind == "ark" else None)
+            for item in result["classifications"]:
+                item["enrichment_source"] = meta
+                item["bnf_match_method"] = kind
+                item["bnf_match_identifier"] = identifier
+                if kind != "ark":
+                    item["bnf_ark"] = result["returned_id"]
+                d["classifications"].append(item)
+            report["bnf"].append(dict(ppn=d["ppn"], search_field=kind,
+                                      searched_identifier=identifier, **result))
+        except (httpx.HTTPError, ValueError, etree.XMLSyntaxError, TypeError) as exc:
+            report["errors"].append(dict(service="bnf", ppn=d["ppn"], search_field=kind,
+                                         searched_identifier=identifier, error=str(exc)))
+        write_report(report_path, report)
     targets = {h["rcr"] for d in documents for h in d["holdings"]}
     raw, meta = cached_fetch(client, LISTRCR_URL, run_dir / "references" / "listrcr.tsv", delay)
     all_libraries = parse_listrcr(raw, meta["retrieved_at"], report["rcr_warnings"])
@@ -210,7 +223,7 @@ def enrich(input_dir, run_dir, client, prior_reference=None, delay=0.3):
         libraries.append(row)
         if index % 20 == 0 or index == len(targets):
             print(f"IdRef : {index}/{len(targets)} RCR", flush=True)
-            write_json(report_path, report)
+            write_report(report_path, report)
     write_jsonl(run_dir / "documents.jsonl", documents)
     write_jsonl(run_dir / "libraries.jsonl", libraries)
     report.update(status="complete" if not report["errors"] else "partial", finished_at=now(),
@@ -221,5 +234,5 @@ def enrich(input_dir, run_dir, client, prior_reference=None, delay=0.3):
                   unknown_rcr=sorted(targets - known.keys()),
                   documents_sha256=digest((run_dir / "documents.jsonl").read_bytes()),
                   libraries_sha256=digest((run_dir / "libraries.jsonl").read_bytes()))
-    write_json(report_path, report)
+    write_report(report_path, report)
     return report

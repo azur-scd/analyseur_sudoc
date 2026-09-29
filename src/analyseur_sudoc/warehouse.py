@@ -17,10 +17,30 @@ FIELD_LISTS = {"authors": "AUTHOR", "publishers": "PUBLISHER", "subjects": "SUBJ
                "coded_dates": "CODED_DATE", "publication_statements": "PUBLICATION_STATEMENT"}
 
 
+def enrichment_is_loadable(report, manifest=None):
+    if report.get("status") == "complete":
+        return True
+    if (report.get("status") != "partial" or not manifest
+            or manifest.get("policy") != "one_bnf_query_per_document_ark_else_ean_else_isbn_fuzzy"):
+        # Cette politique garantit au plus une recherche BnF par notice.
+        return False
+    candidates, errors = report.get("bnf_candidates"), report.get("errors")
+    results = report.get("bnf")
+    if not isinstance(candidates, int) or candidates <= 0 or not isinstance(errors, list) or not isinstance(results, list):
+        return False
+    if not errors or len(errors) * 100 > candidates or any(e.get("service") != "bnf" for e in errors):
+        return False
+    outcomes = results + errors
+    ppns = [entry.get("ppn") for entry in outcomes]
+    return len(outcomes) == candidates and all(ppns) and len(set(ppns)) == candidates
+
+
 def load_corpus(enrichment_dir, database, corpus_id, year):
     directory, database = Path(enrichment_dir).resolve(), Path(database).resolve()
     report = json.loads((directory / "report.json").read_text(encoding="utf-8"))
-    if report["status"] != "complete":
+    manifest_path = directory / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else None
+    if not enrichment_is_loadable(report, manifest):
         raise ValueError("Enrichissement incomplet : chargement refusé")
     for file in ("documents", "libraries"):
         if digest((directory / f"{file}.jsonl").read_bytes()) != report[f"{file}_sha256"]:

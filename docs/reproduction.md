@@ -17,7 +17,7 @@ documentés pour le lot de démonstration :
 |---|---|---|
 | Nom local du lot collecté | `sample-2000` | Dossiers sous `data/raw/`, `data/processed/` et `data/enrichment/` |
 | `corpus_id` DuckDB | `sample-2000-2025-bnf-idref-v1` | Chargement du corpus enrichi et requêtes SQL associées |
-| `run_id` DuckDB | `idref-606a-v1` | Chargement séparé des classifications d'autorité et requêtes SQL associées |
+| `run_id` DuckDB | `idref-606a-v1` | Provenance de l'enrichissement d'autorités stocké dans `CLASSIFICATION` |
 
 ## 1. Installation
 
@@ -183,8 +183,8 @@ SELECT ppn, occurrence, value FROM SUMMARY;
 
 ```sql
 -- Classes distinctes par notice et par méthode IdRef.
-SELECT DISTINCT ppn, scheme, code
-FROM AUTHORITY_CLASSIFICATION
+SELECT DISTINCT ppn, scheme, code, requested_authority_ppn, resolved_authority_ppn
+FROM CLASSIFICATION
 WHERE run_id = 'idref-606a-v1'
   AND corpus_id = 'sample-2000-2025-bnf-idref-v1'
   AND code IS NOT NULL;
@@ -193,13 +193,8 @@ WHERE run_id = 'idref-606a-v1'
 ```sql
 -- Comparer sans mélanger les méthodes : sudoc:676$a, bnf:676$a,
 -- idref:dewey, idref:rameau_domain.
-SELECT DISTINCT ppn, source AS "méthode", dewey_normalized AS code
+SELECT DISTINCT ppn, source, scheme, code
 FROM CLASSIFICATION
-WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1' AND dewey_normalized IS NOT NULL
-UNION ALL
-SELECT DISTINCT ppn, 'idref:' || scheme AS "méthode", code
-FROM AUTHORITY_CLASSIFICATION
-WHERE run_id = 'idref-606a-v1'
-  AND corpus_id = 'sample-2000-2025-bnf-idref-v1'
+WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1'
   AND code IS NOT NULL;
 ```

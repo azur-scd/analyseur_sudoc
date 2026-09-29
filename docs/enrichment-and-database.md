@@ -120,7 +120,7 @@ La base de test antérieure `data/sudoc.sample.duckdb` reste indépendante.
 | LIBRARY | Métadonnées des RCR, identifiants conservés en texte |
 | CORPUS_LIBRARY | Métadonnées complètes et provenance des bibliothèques, figées par corpus |
 | HOLDING | Couples PPN/RCR dédoublonnés par corpus, avec preuves |
-| CLASSIFICATION | Toutes les Dewey, sources Sudoc/BnF distinctes, indices bruts et normalisés |
+| CLASSIFICATION | Dewey Sudoc/BnF/IdRef et domaines Rameau, avec source, schéma, exécution et lien d'autorité |
 | DOCUMENT_FIELD | Champs répétables, une ligne par occurrence et catégorie |
 
 Les vues AUTHOR, PUBLISHER, SUBJECT, SUMMARY, LANGUAGE, COUNTRY, BNF_LINK,
@@ -136,6 +136,11 @@ les métadonnées exactes de chaque chargement pour comparer les campagnes.
 -- Toutes les Dewey ajoutées par la BnF.
 SELECT ppn, dewey_raw, dewey_normalized
 FROM CLASSIFICATION WHERE source = 'bnf:676$a';
+
+-- Classifications IdRef et domaines Rameau, avec provenance de l'autorité.
+SELECT ppn, run_id, scheme, code, requested_authority_ppn, resolved_authority_ppn
+FROM CLASSIFICATION
+WHERE run_id = 'idref-606a-v1' AND code IS NOT NULL;
 
 -- Notices et noms des bibliothèques possédantes pour le lot livré.
 SELECT d.ppn, d.title, l.rcr, l.label, l.iln, l.library_type

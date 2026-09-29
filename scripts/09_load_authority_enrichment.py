@@ -1,4 +1,4 @@
-"""Ajoute les classes IdRef à DuckDB dans des tables séparées."""
+"""Ajoute les classes IdRef à CLASSIFICATION et conserve les liens d'autorité."""
 
 import argparse
 import json

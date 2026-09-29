@@ -78,32 +78,35 @@ collecte empêche la finalisation jusqu'à reprise réussie.
 ## DuckDB
 
 L'enrichissement est attaché au corpus existant sans le dupliquer ni modifier
-les tables DOCUMENT, CLASSIFICATION ou HOLDING :
+les tables DOCUMENT ou HOLDING. Ses classifications sont insérées dans
+`CLASSIFICATION`, avec leur `run_id`, `scheme` et leurs PPN d'autorité :
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/09_load_authority_enrichment.py --enrichment-dir data/enrichment/sample-2000/idref-606a-v0.1.0 --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-idref-v1 --run-id idref-606a-v1
 ```
 
-Les tables AUTHORITY_RUN, AUTHORITY_DOCUMENT (JSON complet enrichi),
-AUTHORITY_HEADING et AUTHORITY_CLASSIFICATION conservent séparément ce résultat
-obtenu sur le premier corpus de 2 000 notices de documents parus en 2025. Le
+Les tables AUTHORITY_RUN, AUTHORITY_DOCUMENT (JSON complet enrichi) et
+AUTHORITY_HEADING conservent la provenance des autorités et les liens. Les
+classifications correspondantes sont dans `CLASSIFICATION`. Le résultat porte
+sur le premier corpus de 2 000 notices de documents parus en 2025. Le
 chargement vérifie l'identité du lot et l'absence de modifications des données
 bibliographiques. Il est transactionnel et sans effet si le même enrichissement
 est déjà chargé.
 
 ```sql
 -- Classes distinctes par notice et par méthode IdRef.
-SELECT DISTINCT ppn, scheme, code
-FROM AUTHORITY_CLASSIFICATION
+SELECT DISTINCT ppn, scheme, code, requested_authority_ppn, resolved_authority_ppn
+FROM CLASSIFICATION
 WHERE run_id = 'idref-606a-v1' AND code IS NOT NULL;
 
 -- Comparer sans mélanger les méthodes : sudoc:676$a, bnf:676$a,
 -- idref:dewey, idref:rameau_domain.
-SELECT DISTINCT ppn, source AS methode, dewey_normalized AS code
+SELECT DISTINCT ppn, source, scheme, code
 FROM CLASSIFICATION
-WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1' AND dewey_normalized IS NOT NULL
-UNION ALL
-SELECT DISTINCT ppn, 'idref:' || scheme AS methode, code
-FROM AUTHORITY_CLASSIFICATION
-WHERE run_id = 'idref-606a-v1' AND code IS NOT NULL;
+WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1'
+  AND run_id IN ('', 'idref-606a-v1')
+  AND code IS NOT NULL;
 ```
+
+Les anciennes bases se migrent avec `scripts/10_merge_classifications.py` ; le
+chargeur d'enrichissement applique aussi cette migration automatiquement.

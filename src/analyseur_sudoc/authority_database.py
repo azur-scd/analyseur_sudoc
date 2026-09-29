@@ -1,11 +1,13 @@
-"""Stockage des classifications d'autorités séparé des Dewey de documents."""
+"""Chargement des classifications d'autorités dans CLASSIFICATION."""
 
 import json
+import re
 from pathlib import Path
 
 import duckdb
 
 from analyseur_sudoc.enrichment import digest, read_jsonl
+from analyseur_sudoc.classification_database import ensure_classification_schema
 from analyseur_sudoc.sudoc import now
 
 
@@ -42,6 +44,7 @@ def load_authority_enrichment(directory, database, corpus_id, run_id):
                 raise ValueError(f"Données bibliographiques modifiées pour {d['ppn']}")
         con.execute("BEGIN TRANSACTION")
         try:
+            ensure_classification_schema(con)
             con.execute("""CREATE TABLE IF NOT EXISTS AUTHORITY_RUN (
                 run_id VARCHAR PRIMARY KEY, corpus_id VARCHAR REFERENCES CORPUS(corpus_id),
                 documents_sha256 VARCHAR, loaded_at TIMESTAMPTZ, report JSON)""")
@@ -58,22 +61,35 @@ def load_authority_enrichment(directory, database, corpus_id, run_id):
                 run_id VARCHAR, ppn VARCHAR, occurrence INTEGER, authority_ppn VARCHAR,
                 status VARCHAR, payload JSON, PRIMARY KEY(run_id,ppn,occurrence),
                 FOREIGN KEY(run_id,ppn) REFERENCES AUTHORITY_DOCUMENT(run_id,ppn))""")
-            con.execute("""CREATE TABLE IF NOT EXISTS AUTHORITY_CLASSIFICATION (
-                run_id VARCHAR, ppn VARCHAR, occurrence INTEGER, requested_authority_ppn VARCHAR,
-                resolved_authority_ppn VARCHAR, scheme VARCHAR, code_raw VARCHAR, code VARCHAR,
-                source VARCHAR, payload JSON, PRIMARY KEY(run_id,ppn,occurrence),
-                FOREIGN KEY(run_id,ppn) REFERENCES AUTHORITY_DOCUMENT(run_id,ppn))""")
             con.execute("INSERT INTO AUTHORITY_RUN VALUES (?,?,?,?,?)", [run_id, corpus_id, report["documents_sha256"], now(), json.dumps(report)])
             insert_batch(con, "AUTHORITY_DOCUMENT", [(run_id, corpus_id, d["ppn"], json.dumps(d, ensure_ascii=False)) for d in documents])
             headings = [(run_id, d["ppn"], i, h["authority_ppn"], h["status"], json.dumps(h, ensure_ascii=False))
                         for d in documents for i, h in enumerate(d["idref_606a_links"], 1)]
             insert_batch(con, "AUTHORITY_HEADING", headings)
-            classes = [(run_id, d["ppn"], i, c["via_606a"]["authority_ppn"], c["authority_ppn"],
-                        c["scheme"], c["code_raw"], c["code"], c["source"], json.dumps(c, ensure_ascii=False))
-                       for d in documents for i, c in enumerate(d["idref_606a_classifications"], 1)]
-            insert_batch(con, "AUTHORITY_CLASSIFICATION", classes)
+            classes = []
+            for d in documents:
+                for i, item in enumerate(d["idref_606a_classifications"], 1):
+                    code = item["code"]
+                    is_dewey = item["scheme"] == "dewey" and bool(
+                        code and re.fullmatch(r"[0-9]{3}(?:\.[0-9]+)?", code))
+                    classes.append((corpus_id, d["ppn"], i,
+                                    item["code_raw"] if item["scheme"] == "dewey" else None,
+                                    code if is_dewey else None,
+                                    code[:1] if is_dewey else None,
+                                    code[:2] if is_dewey else None,
+                                    code[:3] if is_dewey else None,
+                                    item["source"], None, json.dumps(item, ensure_ascii=False), run_id,
+                                    item["scheme"], item["code_raw"], code,
+                                    item["via_606a"]["authority_ppn"], item["authority_ppn"]))
+            if classes:
+                con.executemany("""INSERT INTO CLASSIFICATION
+                    (corpus_id,ppn,occurrence,dewey_raw,dewey_normalized,dewey_1,dewey_2,dewey_3,
+                     source,annotation,payload,run_id,scheme,code_raw,code,requested_authority_ppn,resolved_authority_ppn)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", classes)
             counts = {table: con.execute(f"SELECT count(*) FROM {table} WHERE run_id=?", [run_id]).fetchone()[0]
-                      for table in ["AUTHORITY_DOCUMENT", "AUTHORITY_HEADING", "AUTHORITY_CLASSIFICATION"]}
+                      for table in ["AUTHORITY_DOCUMENT", "AUTHORITY_HEADING"]}
+            counts["CLASSIFICATION"] = con.execute(
+                "SELECT count(*) FROM CLASSIFICATION WHERE run_id=?", [run_id]).fetchone()[0]
             if list(counts.values()) != [len(documents), len(headings), len(classes)]:
                 raise ValueError("Écart d'effectifs dans le chargement")
             con.execute("COMMIT")

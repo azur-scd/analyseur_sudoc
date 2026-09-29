@@ -216,7 +216,7 @@ Extraction :
 
 - enrichissements BnF et IdRef ;
 - chargement transactionnel dans DuckDB ;
-- chargement séparé des classifications d'autorité ;
+- chargement dédié des classifications d'autorité dans la table commune `CLASSIFICATION` ;
 - contrôles d'identité des lots, des empreintes et des relations PPN/RCR.
 
 ## V0.5 — Analyse descriptive (**à venir**)

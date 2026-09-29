@@ -347,22 +347,34 @@ Cette table matérialise le graphe fondamental : `DOCUMENT ↔ LIBRARY` (via
 
 #### CLASSIFICATION
 
-Portée : occurrences de Dewey par document et par corpus (`corpus_id`, `ppn`,
-`occurrence`).
+Portée : occurrences de classification rattachées à un document, un corpus et,
+pour les enrichissements d'autorités, une exécution. Cette table contient les
+Dewey Sudoc/BnF, les Dewey d'autorités IdRef et les domaines Rameau.
 
 | Colonne | Type DuckDB | Contraintes |
 |---|---|---|
-| corpus_id | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
-| ppn | VARCHAR | PK (composite), FK (composite) → `DOCUMENT(corpus_id, ppn)` |
+| corpus_id | VARCHAR | PK (composite) |
+| ppn | VARCHAR | PK (composite) |
 | occurrence | INTEGER | PK (composite) |
 | dewey_raw | VARCHAR |  |
 | dewey_normalized | VARCHAR |  |
 | dewey_1 | VARCHAR |  |
 | dewey_2 | VARCHAR |  |
 | dewey_3 | VARCHAR |  |
-| source | VARCHAR |  |
+| source | VARCHAR | PK (composite) |
 | annotation | VARCHAR |  |
 | payload | JSON |  |
+| run_id | VARCHAR | PK (composite), vide pour les classifications bibliographiques |
+| scheme | VARCHAR | `dewey` pour les Dewey ; `rameau_domain` pour les domaines Rameau |
+| code_raw | VARCHAR | Code de classification brut |
+| code | VARCHAR | Code générique normalisé/conservé |
+| requested_authority_ppn | VARCHAR | PPN d'autorité demandé, le cas échéant |
+| resolved_authority_ppn | VARCHAR | PPN d'autorité résolu, le cas échéant |
+
+La clé primaire est `(corpus_id, ppn, source, run_id, occurrence)` afin de
+préserver les classifications répétées de chaque source et exécution. Les
+colonnes `dewey_*` restent nulles pour les domaines Rameau ; utiliser `scheme`
+et `code` pour interroger tous les systèmes sans interpréter Rameau comme Dewey.
 
 #### DOCUMENT_FIELD
 
@@ -414,24 +426,6 @@ Portée : occurrences de liens d'autorité par document et par exécution
 | occurrence | INTEGER | PK (composite) |
 | authority_ppn | VARCHAR |  |
 | status | VARCHAR |  |
-| payload | JSON |  |
-
-#### AUTHORITY_CLASSIFICATION
-
-Portée : classifications issues des autorités par document et par exécution
-(`run_id`, `ppn`, `occurrence`).
-
-| Colonne | Type DuckDB | Contraintes |
-|---|---|---|
-| run_id | VARCHAR | PK (composite), FK (composite) → `AUTHORITY_DOCUMENT(run_id, ppn)` |
-| ppn | VARCHAR | PK (composite), FK (composite) → `AUTHORITY_DOCUMENT(run_id, ppn)` |
-| occurrence | INTEGER | PK (composite) |
-| requested_authority_ppn | VARCHAR |  |
-| resolved_authority_ppn | VARCHAR |  |
-| scheme | VARCHAR |  |
-| code_raw | VARCHAR |  |
-| code | VARCHAR |  |
-| source | VARCHAR |  |
 | payload | JSON |  |
 
 ### 4.9.2. Vues dérivées (champs documentaires)

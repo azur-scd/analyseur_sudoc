@@ -34,7 +34,9 @@ Le dépôt implémente aujourd'hui un pipeline documentaire et technique couvran
 - le chargement analytique local dans DuckDB.
 
 Les classifications IdRef des autorités liées aux seules `606$a` sont traitées
-séparément. Voir [la sélection, la structure JSON et l'accès DuckDB](docs/idref-subject-classifications.md).
+par une campagne dédiée, puis réunies aux Dewey Sudoc/BnF dans la table
+`CLASSIFICATION` de DuckDB. Voir [la sélection, la structure JSON et l'accès
+DuckDB](docs/idref-subject-classifications.md).
 
 Le lot enrichi BnF et IdRef est chargé dans `data/sudoc.duckdb`. Voir
 [l'enrichissement et le schéma DuckDB](docs/enrichment-and-database.md) pour les

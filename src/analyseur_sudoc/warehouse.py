@@ -6,6 +6,7 @@ from pathlib import Path
 import duckdb
 
 from analyseur_sudoc.database import FIELDS
+from analyseur_sudoc.classification_database import ensure_classification_schema
 from analyseur_sudoc.enrichment import digest, read_jsonl
 from analyseur_sudoc.sudoc import now
 
@@ -82,11 +83,7 @@ def load_corpus(enrichment_dir, database, corpus_id, year):
             con.execute("""CREATE TABLE IF NOT EXISTS HOLDING (
                 corpus_id VARCHAR, ppn VARCHAR, rcr VARCHAR REFERENCES LIBRARY(rcr), evidence JSON,
                 PRIMARY KEY(corpus_id,ppn,rcr), FOREIGN KEY(corpus_id,ppn) REFERENCES DOCUMENT(corpus_id,ppn))""")
-            con.execute("""CREATE TABLE IF NOT EXISTS CLASSIFICATION (
-                corpus_id VARCHAR, ppn VARCHAR, occurrence INTEGER, dewey_raw VARCHAR,
-                dewey_normalized VARCHAR, dewey_1 VARCHAR, dewey_2 VARCHAR, dewey_3 VARCHAR,
-                source VARCHAR, annotation VARCHAR, payload JSON, PRIMARY KEY(corpus_id,ppn,occurrence),
-                FOREIGN KEY(corpus_id,ppn) REFERENCES DOCUMENT(corpus_id,ppn))""")
+            ensure_classification_schema(con)
             con.execute("""CREATE TABLE IF NOT EXISTS DOCUMENT_FIELD (
                 corpus_id VARCHAR, ppn VARCHAR, category VARCHAR, occurrence INTEGER, payload JSON,
                 PRIMARY KEY(corpus_id,ppn,category,occurrence),
@@ -102,10 +99,14 @@ def load_corpus(enrichment_dir, database, corpus_id, year):
                 con.executemany("INSERT INTO HOLDING VALUES (?,?,?,?)", holdings)
             classifications = [(corpus_id, d["ppn"], i, v["dewey_raw"], v["dewey_normalized"],
                                 v["dewey_1"], v["dewey_2"], v["dewey_3"], v.get("dewey_source", "sudoc:676$a"),
-                                v.get("dewey_annotation"), json.dumps(v, ensure_ascii=False))
+                                v.get("dewey_annotation"), json.dumps(v, ensure_ascii=False), "", "dewey",
+                                v["dewey_raw"], v["dewey_normalized"], None, None)
                                for d in documents for i, v in enumerate(d["classifications"], 1)]
             if classifications:
-                con.executemany("INSERT INTO CLASSIFICATION VALUES (?,?,?,?,?,?,?,?,?,?,?)", classifications)
+                con.executemany("""INSERT INTO CLASSIFICATION
+                    (corpus_id,ppn,occurrence,dewey_raw,dewey_normalized,dewey_1,dewey_2,dewey_3,
+                     source,annotation,payload,run_id,scheme,code_raw,code,requested_authority_ppn,resolved_authority_ppn)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", classifications)
             occurrences = [(corpus_id, d["ppn"], key, i, json.dumps(v, ensure_ascii=False))
                            for d in documents for key in FIELD_LISTS for i, v in enumerate(d.get(key, []), 1)]
             if occurrences:

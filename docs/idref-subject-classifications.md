@@ -69,7 +69,7 @@ utilisent respectivement les colonnes `dewey_raw` et `dewey_normalized`.
 ## Exécution et reprise
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/08_enrich_606a_authorities.py --input-dir data/enrichment/sample-2000/bnf-idref-v0.1.0 --run-dir data/enrichment/sample-2000/idref-606a-v0.1.0 --include-rameau
+.\.venv\Scripts\python.exe scripts/08_enrich_606a_authorities.py --input-dir data/enrichment/sample-2000/bnf-idref-v0.3.0 --run-dir data/enrichment/sample-2000/idref-606a-v0.1.0 --include-rameau
 ```
 
 `--collect-only` collecte les sources sans enrichir les documents.
@@ -87,7 +87,7 @@ les tables DOCUMENT ou HOLDING. Ses classifications sont insérées dans
 `CLASSIFICATION`, avec leur `run_id`, `scheme` et leurs PPN d'autorité :
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/09_load_authority_enrichment.py --enrichment-dir data/enrichment/sample-2000/idref-606a-v0.1.0 --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-idref-v1 --run-id idref-606a-v1
+.\.venv\Scripts\python.exe scripts/09_load_authority_enrichment.py --enrichment-dir data/enrichment/sample-2000/idref-606a-v0.1.0 --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-fuzzy-v1 --run-id idref-606a-v1
 ```
 
 Les tables AUTHORITY_RUN, AUTHORITY_DOCUMENT (JSON complet enrichi) et
@@ -109,7 +109,7 @@ WHERE run_id = 'idref-606a-v1' AND dewey_normalized IS NOT NULL;
 -- idref:dewey, idref:rameau_domain.
 SELECT DISTINCT ppn, source, scheme, dewey_normalized
 FROM CLASSIFICATION
-WHERE corpus_id = 'sample-2000-2025-bnf-idref-v1'
+WHERE corpus_id = 'sample-2000-2025-bnf-fuzzy-v1'
   AND run_id IN ('', 'idref-606a-v1')
   AND dewey_normalized IS NOT NULL;
 ```

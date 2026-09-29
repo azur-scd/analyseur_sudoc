@@ -123,7 +123,7 @@ même chose :
 - **version du paquet Python** : version publiée dans `pyproject.toml` ;
 - **version du parser / format d'extraction** : versions telles que `unimarc-v0.3.8` ;
 - **version des lots, audits et enrichissements** : versions de dossiers et de
-  campagnes comme `audit-v0.3.1`, `bnf-idref-v0.1.0` ou `idref-606a-v0.1.0` ;
+  campagnes comme `audit-v0.3.1`, `bnf-idref-v0.3.0` ou `idref-606a-v0.1.0` ;
 - **cible produit V1** : niveau fonctionnel décrit par le PRD et les spécifications.
 
 ## Installation (PowerShell, Python 3.11 ou supérieur)

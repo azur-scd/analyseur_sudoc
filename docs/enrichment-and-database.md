@@ -4,9 +4,9 @@
 
 - Entrée : `data/processed/sudoc/sample-2000/unimarc-v0.3.8` (1 995 notices
   retenues sur le premier corpus de 2 000 notices de documents parus en 2025).
-- Enrichissement : `data/enrichment/sample-2000/bnf-idref-v0.1.0`.
+- Enrichissement : `data/enrichment/sample-2000/bnf-idref-v0.3.0`.
 - Base : `data/sudoc.duckdb`.
-- Identifiant du corpus : `sample-2000-2025-bnf-idref-v1`.
+- Identifiant du corpus : `sample-2000-2025-bnf-fuzzy-v1`.
 
 > Convention de version : le dossier `unimarc-v0.3.8` est une extraction produite par `scripts/03_parse_unimarc.py` à partir du parseur `src/analyseur_sudoc/unimarc.py`. La version `0.3.8` désigne ici la version interne du parseur UNIMARC, et non la version du paquet Python.
 
@@ -16,12 +16,6 @@ travaux universitaires édités et les autres cas précédemment litigieux. Le
 filtre antérieur sans 930$b reste appliqué à ce lot brut de 2 000 notices.
 
 ## BnF
-
-Seules les 24 notices sans Dewey exploitable ayant un lien BnF existant sont
-interrogées, par `bib.persistentid` sur l'ARK, au format `unimarcXchange`.
-Une réponse unique dont l'identifiant correspond exactement est requise pour
-ajouter les 676$a. Les diagnostics et erreurs HTTP sont signalés ; une absence
-de notice ou un identifiant différent est conservé comme résultat sans ajout.
 
 Les Dewey Sudoc restent présentes. Chaque ajout porte `dewey_source=bnf:676$a`,
 l'ARK, la référence de champ, l'édition, les règles de normalisation et
@@ -34,33 +28,9 @@ ses `676$a` ; une réponse multiple ne donne aucun ajout.
 L'identifiant recherché, la méthode, la réponse et sa provenance restent tracés.
 Le rapprochement ne repose pas sur le titre.
 
-Dans le lot historique `bnf-idref-v0.1.0`, seules les recherches par lien BnF
-ont été exécutées : les 24 notices ont été retrouvées ; 5 contiennent une Dewey,
-toutes exploitables. Sa couverture est de 763 / 1 995, soit 38,25 %. Ce chiffre
-ne mesure pas encore les gains possibles par ISBN ou EAN ; une nouvelle campagne
-et un nouveau chargement sont nécessaires pour les mesurer. La politique actuelle
-porte la version `0.3.0` et doit être exécutée dans un nouveau dossier de
-campagne ; le dossier historique `bnf-idref-v0.1.0` reste intact.
-
 Documentation : [API SRU Catalogue général BnF](https://api.bnf.fr/fr/api-sru-catalogue-general).
 
-### Campagne ISBN/EAN précédente du 29 septembre 2026
-
-La campagne `data/enrichment/sample-2000/bnf-idref-v0.2.0` a repris les 1 995
-notices du même lot. Le rapport contient 2 244 réponses BnF traitées : 24 par
-lien ARK, 1 477 par ISBN et 743 par EAN. Deux recherches ISBN ont donné plusieurs notices
-et n'ont ajouté aucune classification. Une recherche ISBN a reçu deux fois un
-diagnostic SRU BnF (« erreur de traitement ») ; la campagne est donc `partial`
-et ne doit pas encore être chargée dans DuckDB.
-
-La couverture mesurée sur les sorties de cette campagne est de **813 / 1 995
-(40,75 %)**, contre 763 / 1 995 (38,25 %) dans le lot historique. Les 50
-notices supplémentaires proviennent d'une recherche ISBN à réponse unique.
-Les recherches EAN n'ont pas apporté de Dewey supplémentaire dans ce lot.
-Cette campagne utilisait plusieurs requêtes par notice et les critères
-`bib.isbn`/`bib.ean` ; elle ne représente pas la politique actuelle.
-
-### Campagne `bib.fuzzyISBN` avec une requête par notice
+### Campagne active : `bib.fuzzyISBN`, une requête par notice
 
 La campagne `data/enrichment/sample-2000/bnf-idref-v0.3.0` a traité les mêmes
 1 995 notices. Parmi elles, 1 156 sans Dewey exploitable avaient un lien ARK,
@@ -72,9 +42,8 @@ Le SRU a retourné 1 155 réponses traitées et un diagnostic « erreur de
 traitement » pour l'ISBN `9782336615714`. Une recherche EAN a retourné
 plusieurs notices et n'a donné aucun ajout. Les 56 Dewey BnF utilisables
 proviennent de 5 liens ARK, 30 recherches EAN et 21 recherches ISBN.
-La couverture est de **814 / 1 995 (40,80 %)**, soit 51 notices de plus que
-le lot historique à 38,25 %. Le statut du rapport reste `partial` à cause du
-diagnostic SRU. Le lot est chargé dans `data/sudoc.duckdb` sous l'identifiant
+La couverture est de **814 / 1 995 (40,80 %)**. Le statut du rapport reste
+`partial` à cause du diagnostic SRU. Le lot est chargé dans `data/sudoc.duckdb` sous l'identifiant
 `sample-2000-2025-bnf-fuzzy-v1` ; la base conserve le rapport et son erreur.
 
 Le chargeur accepte désormais automatiquement un rapport `partial` produit par
@@ -101,8 +70,8 @@ La reprise vérifie les paramètres et les empreintes des caches ; les réponses
 déjà enregistrées ne sont pas téléchargées à nouveau.
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/06_enrich_bnf_idref.py --input-dir data/processed/sudoc/sample-2000/unimarc-v0.3.8 --run-dir data/enrichment/sample-2000/bnf-idref-v0.1.0 --prior-reference data/reference/listrcr/smoke-test
-.\.venv\Scripts\python.exe scripts/07_load_corpus.py --enrichment-dir data/enrichment/sample-2000/bnf-idref-v0.1.0 --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-idref-v1 --year 2025
+.\.venv\Scripts\python.exe scripts/06_enrich_bnf_idref.py --input-dir data/processed/sudoc/sample-2000/unimarc-v0.3.8 --run-dir data/enrichment/sample-2000/bnf-idref-v0.3.0 --prior-reference data/reference/listrcr/smoke-test
+.\.venv\Scripts\python.exe scripts/07_load_corpus.py --enrichment-dir data/enrichment/sample-2000/bnf-idref-v0.3.0 --database data/sudoc.duckdb --corpus-id sample-2000-2025-bnf-fuzzy-v1 --year 2025
 ```
 
 ## Stockage
@@ -148,7 +117,7 @@ SELECT d.ppn, d.title, l.rcr, l.label, l.iln, l.library_type
 FROM DOCUMENT d
 JOIN HOLDING h USING (corpus_id, ppn)
 JOIN LIBRARY l USING (rcr)
-WHERE d.corpus_id = 'sample-2000-2025-bnf-idref-v1';
+WHERE d.corpus_id = 'sample-2000-2025-bnf-fuzzy-v1';
 
 -- Les résumés répétés restent des lignes distinctes.
 SELECT ppn, occurrence, value FROM SUMMARY;
